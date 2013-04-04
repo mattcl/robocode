@@ -7,23 +7,23 @@ import java.util.List;
 
 class KDNode<T> {
 	int maxBucketSize;
-	ArrayList<KDDataPoint<T> > bucket;
+	ArrayList<KDDataPoint<T>> bucket;
 	KDDataPoint<T> value;
 	KDNode<T> left;
 	KDNode<T> right;
 	int featureIndex;
 	
 	public KDNode(int maxBucketSize) {
-		this(maxBucketSize, new ArrayList<KDDataPoint<T> >());
+		this(maxBucketSize, new ArrayList<KDDataPoint<T>>());
 	}
 	
-	public KDNode(int maxBucketSize, List<KDDataPoint<T> > seedBucket) {
+	public KDNode(int maxBucketSize, List<KDDataPoint<T>> seedBucket) {
 		this.value = null;
 		this.maxBucketSize = maxBucketSize;
 		this.left = null;
 		this.right = null;
 		this.featureIndex = -1;
-		this.bucket = new ArrayList<KDDataPoint<T> >(seedBucket);
+		this.bucket = new ArrayList<KDDataPoint<T>>(seedBucket);
 		if (this.bucket.size() > this.maxBucketSize) {
 			splitBucket();
 		}
@@ -82,7 +82,7 @@ class KDNode<T> {
 	}
 	
 	protected void sortBucket(final int feature) {
-		Collections.sort(this.bucket, new Comparator<KDDataPoint<T> >() {
+		Collections.sort(this.bucket, new Comparator<KDDataPoint<T>>() {
 			public int compare(KDDataPoint<T> o1, KDDataPoint<T> o2) {
 				if (o1.features[feature] > o2.features[feature]) {
 					return 1;

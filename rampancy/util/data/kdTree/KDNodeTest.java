@@ -13,8 +13,8 @@ import org.junit.Test;
 public class KDNodeTest {
 	KDNode<String> node;
 	
-	protected ArrayList<KDDataPoint<String> > getSeed(int length) {
-		ArrayList<KDDataPoint<String> > seed = new ArrayList<KDDataPoint<String> >();
+	protected ArrayList<KDDataPoint<String>> getSeed(int length) {
+		ArrayList<KDDataPoint<String>> seed = new ArrayList<KDDataPoint<String>>();
 		for (int i = 0; i < length; i++) {
 			double[] features = {1, 2 + i, 3, 4};
 			seed.add(new KDDataPoint<String>("SeedData" + i, features));
@@ -35,7 +35,7 @@ public class KDNodeTest {
 
 	@Test
 	public void testKDNodeWithSeed() {
-		ArrayList<KDDataPoint<String> > seed = getSeed(9);
+		ArrayList<KDDataPoint<String>> seed = getSeed(9);
 		this.node = new KDNode<String>(10, seed);
 		assertNull(this.node.value);
 		assertNull(this.node.left);
@@ -50,7 +50,7 @@ public class KDNodeTest {
 
 	@Test
 	public void testAdd() {
-		ArrayList<KDDataPoint<String> > seed = getSeed(9);
+		ArrayList<KDDataPoint<String>> seed = getSeed(9);
 		this.node = new KDNode<String>(10, seed);
 		double[] features = {1, 2, 3, 4};
 		KDDataPoint<String> newElem = new KDDataPoint<String>("hello", features);
@@ -67,7 +67,7 @@ public class KDNodeTest {
 
 	@Test
 	public void testAddToSplitNodeAddsToLeaf() {
-		ArrayList<KDDataPoint<String> > seed = getSeed(11);
+		ArrayList<KDDataPoint<String>> seed = getSeed(11);
 		this.node = new KDNode<String>(10, seed);
 		double[] features = {1, 2, 3, 4};
 		KDDataPoint<String> newElem = new KDDataPoint<String>("hello", features);
@@ -82,7 +82,7 @@ public class KDNodeTest {
 	
 	@Test
 	public void testAddToSplitNodeCreatesLeafIfItDoesNotExist() {
-		ArrayList<KDDataPoint<String> > seed = getSeed(11);
+		ArrayList<KDDataPoint<String>> seed = getSeed(11);
 		this.node = new KDNode<String>(10, seed);
 		this.node.left = null;
 		double[] features = {1, 2, 3, 4};
@@ -101,7 +101,7 @@ public class KDNodeTest {
 
 	@Test
 	public void testSplitBucket() {
-		ArrayList<KDDataPoint<String> > seed = new ArrayList<KDDataPoint<String> >();
+		ArrayList<KDDataPoint<String>> seed = new ArrayList<KDDataPoint<String>>();
 		for (int i = 0; i < 9; i++) {
 			double[] features = {1 + i, 2, 3, 4};
 			seed.add(new KDDataPoint<String>("SeedData" + i, features));
@@ -122,7 +122,7 @@ public class KDNodeTest {
 	
 	@Test
 	public void testKDTreeWithSeedLargerThanMaxBucketSplitsBucket() {
-		ArrayList<KDDataPoint<String> > seed = getSeed(20);
+		ArrayList<KDDataPoint<String>> seed = getSeed(20);
 		this.node = new KDNode<String>(10, seed);
 		assertEquals(seed.get(10), this.node.value);
 		
@@ -134,7 +134,7 @@ public class KDNodeTest {
 
 	@Test
 	public void testFindMedianIndex() {
-		ArrayList<KDDataPoint<String> > seed = new ArrayList<KDDataPoint<String> >();
+		ArrayList<KDDataPoint<String>> seed = new ArrayList<KDDataPoint<String>>();
 		for (int i = 0; i < 9; i++) {
 			double[] features = {1 + i, 2, 3, 4};
 			seed.add(new KDDataPoint<String>("SeedData" + i, features));
@@ -146,7 +146,7 @@ public class KDNodeTest {
 
 	@Test
 	public void testGetBestSplittingFeature() {
-		ArrayList<KDDataPoint<String> > seed = new ArrayList<KDDataPoint<String> >();
+		ArrayList<KDDataPoint<String>> seed = new ArrayList<KDDataPoint<String>>();
 		for (int i = 0; i < 9; i++) {
 			double[] features = {1 + i, 2, 3, 4};
 			seed.add(new KDDataPoint<String>("SeedData" + i, features));
@@ -155,7 +155,7 @@ public class KDNodeTest {
 		assertEquals(0, this.node.getBestSplittingFeature());
 	
 		// select the wider standard deviation
-		seed = new ArrayList<KDDataPoint<String> >();
+		seed = new ArrayList<KDDataPoint<String>>();
 		for (int i = 0; i < 9; i++) {
 			double[] features = {1 + i, 2, 3 + i * 2, 4};
 			seed.add(new KDDataPoint<String>("SeedData" + i, features));
