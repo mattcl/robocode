@@ -10,6 +10,15 @@ class KDDataPoint<T> {
 		this.value = value;
 		this.features = Arrays.copyOf(features, features.length);
 	}
+	
+	public double distanceTo(KDDataPoint<T> point) {
+		double distance = 0;
+		for (int i = 0; i < features.length; i++) {
+			double diff = this.features[i] - point.features[i];
+			distance += diff * diff;
+		}
+		return distance;
+	}
 
 	@Override
 	public int hashCode() {

@@ -27,21 +27,21 @@ public class KDTree<T> {
 		this.root = new KDNode<T>(this.maxBucketSize, dataPoints);
 	}
 	
-	public List<KDDataPoint<T>> nearstNeighbors(double[] features, int numNeighbors) {
-		ArrayList<KDNode<T>> path = pathToNearestNeighbor(features);
+	public List<KDDataPoint<T>> nearstNeighbors(KDDataPoint<T> point, int numNeighbors) {
+		ArrayList<KDNode<T>> path = pathToNearestNeighbor(point);
 		ArrayList<KDDataPoint<T>> neighbors = new ArrayList<KDDataPoint<T>>();
-		for (int i = path.size() - 1; i >= 0 && neighbors.size() < numNeighbors; i++) {
+		for (int i = path.size() - 1; i >= 0; i++) {
 			KDNode<T> current = path.get(i);
 			if (current.bucket != null) {
 				neighbors.addAll(current.bucket);
 			} else {
-				
+				neighbors.add(current.value);
 			}
 		}
 		return neighbors;
 	}
 	
-	protected ArrayList<KDNode<T>> pathToNearestNeighbor(double[] features) {
+	protected ArrayList<KDNode<T>> pathToNearestNeighbor(KDDataPoint<T> point) {
 		ArrayList<KDNode<T>> path = new ArrayList<KDNode<T>>();
 		KDNode<T> current = this.root;
 		while (current != null) {
@@ -52,12 +52,30 @@ public class KDTree<T> {
 				break;
 			}
 			
-			if (features[current.featureIndex] < current.value.features[current.featureIndex]) {
+			if (point.features[current.featureIndex] < current.value.features[current.featureIndex]) {
 				current = current.left;
 			} else {
 				current = current.right;
 			}
 		}
 		return path;
+	}
+}
+
+class NNSearch<T> {
+	int numNeighbors;
+	KDDataPoint<T> target;
+	ArrayList<KDNode<T>> path;
+	ArrayList<KDDataPoint<T>> candidates;
+	double currentBest;
+	double currentWorst;
+	
+	public NNSearch(int numNeighbors, KDDataPoint<T> target) {
+		this.numNeighbors = numNeighbors;
+		this.target = target;
+		this.path = new ArrayList<KDNode<T>>();
+		this.candidates = new ArrayList<KDDataPoint<T>>();
+		this.currentBest = -1;
+		this.currentWorst = -1;
 	}
 }
