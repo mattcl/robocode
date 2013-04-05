@@ -1,19 +1,18 @@
 package rampancy.util.data.kdTree;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class KDTree<T> {
 	protected int maxBucketSize;
-	protected ArrayList<KDDataPoint<T>> dataPoints;
+	protected ArrayList<KDPoint<T>> dataPoints;
 	protected KDNode<T> root;
 
 	public KDTree(int maxBucketSize) {
-		this.dataPoints = new ArrayList<KDDataPoint<T>>();
+		this.dataPoints = new ArrayList<KDPoint<T>>();
 		this.root = null;
 	}
 	
-	public void add(KDDataPoint<T> value) {
+	public void add(KDPoint<T> value) {
 		dataPoints.add(value);
 		if (this.root == null) {
 			this.root = new KDNode<T>(this.maxBucketSize);
@@ -26,55 +25,55 @@ public class KDTree<T> {
 		this.root = null;
 		this.root = new KDNode<T>(this.maxBucketSize, dataPoints);
 	}
-	
-	public List<KDDataPoint<T>> nearstNeighbors(KDDataPoint<T> point, int numNeighbors) {
-		ArrayList<KDNode<T>> path = pathToNearestNeighbor(point);
-		ArrayList<KDDataPoint<T>> neighbors = new ArrayList<KDDataPoint<T>>();
-		for (int i = path.size() - 1; i >= 0; i++) {
-			KDNode<T> current = path.get(i);
-			if (current.bucket != null) {
-				neighbors.addAll(current.bucket);
-			} else {
-				neighbors.add(current.value);
-			}
-		}
-		return neighbors;
+
+	public KDPoint<T> nearestNeighbor(KDPoint<T> query) {
+		return null;
 	}
 	
-	protected ArrayList<KDNode<T>> pathToNearestNeighbor(KDDataPoint<T> point) {
-		ArrayList<KDNode<T>> path = new ArrayList<KDNode<T>>();
-		KDNode<T> current = this.root;
-		while (current != null) {
-			path.add(current);
-		
-			// the node has not split yet, we're done
-			if (current.value == null) {
-				break;
+	protected void recursiveNearestNeighbor(KDNode<T> root, NNSearch<T> search) {
+		if (root.left == null && root.right == null) {
+			for (KDPoint<T> point : root.bucket) {
+				double currentDist = point.distanceTo(search.query);
+				if (currentDist < search.bestDistance) {
+					search.bestDistance = currentDist;
+					search.best = point;
+				}
 			}
-			
-			if (point.features[current.featureIndex] < current.value.features[current.featureIndex]) {
-				current = current.left;
-			} else {
-				current = current.right;
-			}
+			return;
 		}
-		return path;
+		if (search.query.features[root.featureIndex] < root.value.features[root.featureIndex]) {
+			
+		} else {
+			
+		}
+	}
+}	
+
+class NNSearch<T> {
+	KDPoint<T> query;
+	KDPoint<T> best;
+	double bestDistance;
+	
+	public NNSearch(KDPoint<T> query) {
+		this.query = query;
+		this.best = null;
+		this.bestDistance = Double.POSITIVE_INFINITY;
 	}
 }
 
-class NNSearch<T> {
+class KNNSearch<T> {
 	int numNeighbors;
-	KDDataPoint<T> target;
+	KDPoint<T> target;
 	ArrayList<KDNode<T>> path;
-	ArrayList<KDDataPoint<T>> candidates;
+	ArrayList<KDPoint<T>> candidates;
 	double currentBest;
 	double currentWorst;
 	
-	public NNSearch(int numNeighbors, KDDataPoint<T> target) {
+	public KNNSearch(int numNeighbors, KDPoint<T> target) {
 		this.numNeighbors = numNeighbors;
 		this.target = target;
 		this.path = new ArrayList<KDNode<T>>();
-		this.candidates = new ArrayList<KDDataPoint<T>>();
+		this.candidates = new ArrayList<KDPoint<T>>();
 		this.currentBest = -1;
 		this.currentWorst = -1;
 	}

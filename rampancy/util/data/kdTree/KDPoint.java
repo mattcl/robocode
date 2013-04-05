@@ -2,16 +2,16 @@ package rampancy.util.data.kdTree;
 
 import java.util.Arrays;
 
-class KDDataPoint<T> {
+class KDPoint<T> {
 	T value;
 	double[] features;
 	
-	public KDDataPoint(T value, double[] features) {
+	public KDPoint(T value, double[] features) {
 		this.value = value;
 		this.features = Arrays.copyOf(features, features.length);
 	}
 	
-	public double distanceTo(KDDataPoint<T> point) {
+	public double distanceTo(KDPoint<T> point) {
 		double distance = 0;
 		for (int i = 0; i < features.length; i++) {
 			double diff = this.features[i] - point.features[i];
@@ -38,7 +38,7 @@ class KDDataPoint<T> {
 		if (getClass() != obj.getClass())
 			return false;
 		@SuppressWarnings("unchecked")
-		KDDataPoint<T> other = (KDDataPoint<T>) obj;
+		KDPoint<T> other = (KDPoint<T>) obj;
 		if (!Arrays.equals(features, other.features))
 			return false;
 		if (value == null) {
