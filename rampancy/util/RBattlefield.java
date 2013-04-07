@@ -7,14 +7,6 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 
-/**
- * @author Matthew Chun-Lum
- *
- */
-/**
- * @author Matthew Chun-Lum
- *
- */
 public class RBattlefield {
     public static final int AGAINST_WALL   = 0;
     public static final int NEAR_WALL      = 1;
@@ -31,11 +23,6 @@ public class RBattlefield {
     public int width;
     public int height;
     
-    /**
-     * Constructor
-     * @param width
-     * @param height
-     */
     public RBattlefield(int width, int height) {
         this.width = width;
         this.height = height;
@@ -50,10 +37,6 @@ public class RBattlefield {
                 height - INNER_DISTANCE * 2 + 18);
     }
     
-    /**
-     * @param point
-     * @return true if the point is contained in the battlefield
-     */
     public boolean contains(RPoint point) {
         return bfRect.contains(point);
     }
@@ -90,10 +73,6 @@ public class RBattlefield {
         return Math.max(1, distanceFromLeft(point) - INNER_DISTANCE);
     }
     
-    /**
-     * @param point
-     * @return the closest distance to any wall
-     */
     public double distanceFromWall(RPoint point) {
         if(!contains(point))
             return -1;
@@ -106,19 +85,10 @@ public class RBattlefield {
         return Math.min(Math.min(distRight, distLeft), Math.min(distTop, distBot));
     }
     
-    /**
-     * @param point
-     * @return the category corresponding to the point's
-     *         distance from a wall
-     */
     public int distanceFromWallCategory(RPoint point) {
         return distanceFromWallCategory(distanceFromWall(point));
     }
     
-    /**
-     * @param distance
-     * @return the category corresponding to a distance from a wall
-     */
     public int distanceFromWallCategory(double distance) {
         if(distance < AGAINST_WALL_TOLERANCE)
             return AGAINST_WALL;
@@ -129,10 +99,6 @@ public class RBattlefield {
         return AWAY_FROM_WALL;
     }
     
-    /**
-     * @param point
-     * @return
-     */
     public boolean validMovePosition(RPoint point) {
         return innerRect.contains(point);
     }

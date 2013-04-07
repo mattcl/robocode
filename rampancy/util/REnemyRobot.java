@@ -1,12 +1,14 @@
 package rampancy.util;
 
-import java.awt.*;
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.Stroke;
 import java.awt.geom.Ellipse2D;
-import java.util.*;
+import java.util.ArrayList;
 
 import rampancy.RampantRobot;
-import robocode.*;
-import robocode.util.Utils;
+import robocode.ScannedRobotEvent;
 
 public class REnemyRobot {
     public static final int MAX_HISTORY_SIZE = 1500;
@@ -32,24 +34,13 @@ public class REnemyRobot {
     protected Ellipse2D.Double desiredMinDistance;
     protected Ellipse2D.Double desiredMaxDistance;
     
-    protected RampantRobot reference;
-    
-    public REnemyRobot(String name, RampantRobot reference) {
+    public REnemyRobot(String name) {
         this.name = name;
         listeners = new ArrayList<REnemyListener>();
         states = new ArrayList<RRobotState>();
         resetState();
         shotsFired = 0;
         shotsHit = 0;
-        this.reference = reference;
-    }
-    
-    public void updateReference(RampantRobot reference) {
-        this.reference = reference;
-    }
-    
-    public RampantRobot getReference() {
-        return reference;
     }
     
     public String getName() {
@@ -68,9 +59,9 @@ public class REnemyRobot {
     }
     
     public double getShotPower() {
-        if(!shotFired()) 
+        if(!shotFired())  {
             return 0;
-        
+        }
         return getLastState().energy - getCurrentState().energy;
     }
     
@@ -94,27 +85,31 @@ public class REnemyRobot {
         return preferredSafeDistance;
     }
     
-    public void addState(ScannedRobotEvent e) {
-        states.add(0, new RRobotState(this, e));
-        if(states.size() >= MAX_HISTORY_SIZE)
+    public void addState(RampantRobot reference, RBattlefield battlefield, ScannedRobotEvent e) {
+        states.add(0, new RRobotState(reference, this, battlefield, e));
+        if(states.size() >= MAX_HISTORY_SIZE) {
             states.remove(states.size() - 1); // remove the last state
+        }
     }
     
     public RRobotState getCurrentState() {
-        if(states.size() > 0)
+        if(states.size() > 0) {
             return states.get(0);
+        }
         return null;
     }
     
     public RRobotState getLastState() {
-        if(states.size() > 1)
+        if(states.size() > 1) {
             return states.get(1);
+        }
         return null;
     }
     
     public ArrayList<RRobotState> getLastNStates(int n) {
-        if(states.isEmpty())
+        if(states.isEmpty()) {
             return null;
+        }
         return new ArrayList<RRobotState>(states.subList(0, Math.min(n-1, states.size())));
     }
     
@@ -127,14 +122,16 @@ public class REnemyRobot {
     }
     
     public int getLastUsableSurfDirection() {
-        if(trackedDirections.size() > 2)
+        if(trackedDirections.size() > 2) {
             return trackedDirections.get(2);
+        }
         return 0;
     }
     
     public double getLastUsableBearing() {
-        if(trackedBearings.size() > 2)
+        if(trackedBearings.size() > 2) {
             return trackedBearings.get(2);
+        }
         return 0;
     }
     
@@ -144,9 +141,9 @@ public class REnemyRobot {
         trackedDirections = new ArrayList<Integer>();
     }
     
-    public void update(ScannedRobotEvent e) {
-        addState(e);
-        updateTracking(e);
+    public void update(RampantRobot reference, RBattlefield battlefield, ScannedRobotEvent e) {
+        addState(reference, battlefield, e);
+        updateTracking(reference, e);
         if(shotFired()) {
             notifyShotFired();
             shotsFired++;
@@ -157,8 +154,9 @@ public class REnemyRobot {
     
     public void draw(Graphics2D g) {        
         RRobotState state = getCurrentState();
-        if(state == null)
+        if(state == null) {
             return;
+        }
         
         g.setColor(Color.white);
         g.draw(new RRectangle(state.location));
@@ -167,35 +165,21 @@ public class REnemyRobot {
     // ---------- Private ---------- //
     private void updateZones() {
         RRobotState state = getCurrentState();
-        if(state == null)
+        if(state == null) {
             return;
+        }
         
         RPoint location = state.location;
-        double absBearing = Utils.normalAbsoluteAngle(state.absoluteBearing + Math.PI);
         double maxEscapeAngle = RUtil.computeMaxEscapeAngle(RUtil.computeBulletVelocity(0.1));
 
         minSafeDistance = 30 / Math.sin(maxEscapeAngle);
-        
-        preferredSafeDistance = 230;
-        
         absoluteDangerZone = new Ellipse2D.Double(location.x - minSafeDistance, 
                                                   location.y - minSafeDistance, 
                                                   minSafeDistance * 2, 
                                                   minSafeDistance * 2);
-        
-        desiredMinDistance = new Ellipse2D.Double(location.x - preferredSafeDistance, 
-                                                  location.y - preferredSafeDistance, 
-                                                  preferredSafeDistance * 2, 
-                                                  preferredSafeDistance * 2);
-        
-        desiredMaxDistance = new Ellipse2D.Double(location.x - 400, 
-                                                  location.y - 400, 
-                                                  400 * 2, 
-                                                  400 * 2);
-        
     }
     
-    private void updateTracking(ScannedRobotEvent e) {
+    private void updateTracking(RampantRobot reference, ScannedRobotEvent e) {
         double lateralVelocity = reference.getVelocity() * Math.sin(e.getBearingRadians());
         int direction = lateralVelocity >= 0 ? 1 : -1;
         trackedDirections.add(0, direction);
@@ -220,12 +204,14 @@ public class REnemyRobot {
     }
     
     public void notifyListeners() {
-        for(REnemyListener listener : listeners)
+        for(REnemyListener listener : listeners) {
             listener.enemyUpdated(this);
+        }
     }
     
     public void notifyShotFired() {
-        for(REnemyListener listener : listeners)
+        for(REnemyListener listener : listeners) {
             listener.shotFired(this);
+        }
     }
 }

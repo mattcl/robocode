@@ -1,11 +1,13 @@
 package rampancy;
 
 import java.util.LinkedList;
-import robocode.util.*;
+
+import rampancy.util.RBattlefield;
+import rampancy.util.RPoint;
+import rampancy.util.RRobotState;
 import robocode.AdvancedRobot;
 import robocode.ScannedRobotEvent;
-
-import rampancy.util.*;
+import robocode.util.Utils;
 
 public abstract class RampantRobot extends AdvancedRobot {
 	
@@ -41,5 +43,11 @@ public abstract class RampantRobot extends AdvancedRobot {
 		setTurnRadarRightRadians(factor * Utils.normalRelativeAngle(radarTurn));
 	}
 	
+	public RRobotState getCurrentState() {
+		return null; // TDOO
+	}
 	
+	public RPoint getLocation() {
+		return new RPoint(getX(), getY());
+	}
 }

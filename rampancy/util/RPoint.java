@@ -1,11 +1,11 @@
 package rampancy.util;
 
-import java.awt.Graphics2D;
 import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
+
 import robocode.util.Utils;
 
-public class RPoint extends Point2D.Double implements RDrawable {
+@SuppressWarnings("serial")
+public class RPoint extends Point2D.Double {
 	
 	public RPoint(double x, double y) {
 		super(x, y);
@@ -28,8 +28,4 @@ public class RPoint extends Point2D.Double implements RDrawable {
 	public double computeAbsoluteBearingFrom(RPoint source) {
         return Utils.normalAbsoluteAngle(Math.atan2(x - source.x, y - source.y));
     }
-
-	public void draw(Graphics2D g) {
-		
-	}
 }

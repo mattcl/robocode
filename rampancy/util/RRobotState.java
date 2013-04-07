@@ -1,9 +1,6 @@
 package rampancy.util;
 
-import java.util.Comparator;
-
 import rampancy.RampantRobot;
-import rampancy.util.data.RSegmentFunction;
 import robocode.ScannedRobotEvent;
 import robocode.util.Utils;
 
@@ -19,7 +16,7 @@ public class RRobotState {
     public double deltaH;
     public double distance;
     public double distanceFromWall;
-    public int    distanceFromWallCategory;
+    public int distanceFromWallCategory;
     public double timeSinceVelocityChange;
     public double timeSinceDirectionChange;
     public double timeSinceStop;
@@ -31,7 +28,7 @@ public class RRobotState {
     
     public RRobotState() {}
     
-    public RRobotState(RampantRobot robot, ScannedRobotEvent e) {
+    public RRobotState(RampantRobot robot, RBattlefield battlefield, ScannedRobotEvent e) {
         RRobotState lastState = robot.getCurrentState();
         double enemyAbsoluteBearing = e == null ? 0 : Utils.normalAbsoluteAngle(robot.getHeadingRadians() + e.getBearingRadians());
         double enemyDistance = e == null ? 100 : e.getDistance();
@@ -50,7 +47,7 @@ public class RRobotState {
         this.deltaH                   = lastState == null ? 0 : heading - lastState.heading;
         this.distance                 = 0;
         this.distanceFromWall         = RUtil.getDistanceFromWall(location);
-        this.distanceFromWallCategory = RampantRobot.getGlobalBattlefield().distanceFromWallCategory(location);
+        this.distanceFromWallCategory = battlefield.distanceFromWallCategory(location);
         this.timeSinceVelocityChange  = deltaV != 0 || lastState == null ? 0 : lastState.timeSinceVelocityChange + 1;
         this.directionTraveling       = lateralVelocity >= 0 ? 1 : -1;
         this.timeSinceDirectionChange = lastState == null || lastState.directionTraveling != directionTraveling ? 0 : 
@@ -64,8 +61,7 @@ public class RRobotState {
      * @param enemy
      * @param e
      */
-    public RRobotState(REnemyRobot robot, ScannedRobotEvent e) {
-        RampantRobot reference = robot.getReference();
+    public RRobotState(RampantRobot reference, REnemyRobot robot, RBattlefield battlefield, ScannedRobotEvent e) {
         if(reference == null) {
             return;
         } else {
@@ -83,7 +79,7 @@ public class RRobotState {
             this.deltaH                   = lastState == null ? 0 : heading - lastState.heading;
             this.distance                 = e.getDistance();
             this.distanceFromWall         = RUtil.getDistanceFromWall(location);
-            this.distanceFromWallCategory = RampantRobot.getGlobalBattlefield().distanceFromWallCategory(location);
+            this.distanceFromWallCategory = battlefield.distanceFromWallCategory(location);
             this.timeSinceVelocityChange  = deltaV != 0 || lastState == null ? 0 : lastState.timeSinceVelocityChange + 1;
             this.directionTraveling       = lateralVelocity >= 0 ? 1 : -1;
             this.timeSinceDirectionChange = lastState == null || lastState.directionTraveling != directionTraveling ? 0 : 
@@ -96,9 +92,9 @@ public class RRobotState {
     public RRobotState(RPoint location, double absoluteBearing, 
             double velocity, double lateralVelocity, double advancingVelocity,
             double deltaV, double heading, double deltaH, double distance, 
-            double distanceFromWall, double timeSinceVelocityChange, 
-            double timeSinceDirectionChange, double timeSinceStop, 
-            double energy, int directionTraveling) {
+            double distanceFromWall, int distanceFromWallCategory, 
+            double timeSinceVelocityChange, double timeSinceDirectionChange, 
+            double timeSinceStop, double energy, int directionTraveling) {
         this.location                 = location.getCopy();
         this.absoluteBearing          = absoluteBearing;
         this.velocity                 = velocity;
@@ -109,6 +105,7 @@ public class RRobotState {
         this.deltaH                   = deltaH;
         this.distance                 = distance;
         this.distanceFromWall         = distanceFromWall;
+        this.distanceFromWallCategory = distanceFromWallCategory;
         this.timeSinceVelocityChange  = timeSinceVelocityChange;
         this.timeSinceDirectionChange = timeSinceDirectionChange;
         this.timeSinceStop            = timeSinceStop;
@@ -129,6 +126,7 @@ public class RRobotState {
              state.deltaH,
              state.distance,
              state.distanceFromWall,
+             state.distanceFromWallCategory,
              state.timeSinceVelocityChange,
              state.timeSinceDirectionChange,
              state.timeSinceStop,
@@ -139,10 +137,6 @@ public class RRobotState {
     public RRobotState getCopy() {
         return new RRobotState(this);
     }
-    
-    
-    
-    // ------------- Distance Functions ------------- //
     
     @Override
     public int hashCode() {

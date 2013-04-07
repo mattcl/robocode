@@ -4,12 +4,8 @@
 package rampancy.util;
 
 import java.awt.Graphics2D;
-import java.util.List;
 
 import rampancy.RampantRobot;
-import rampancy.util.movement.MovSim;
-import rampancy.util.movement.MovSimStat;
-import rampancy.util.wave.REnemyWave;
 import robocode.AdvancedRobot;
 import robocode.util.Utils;
 
@@ -25,9 +21,6 @@ public abstract class RUtil {
     
     /**
      * Computes the absolute bearing from the source to the target
-     * @param source
-     * @param target
-     * @return the absolute bearing in radians
      */
     public static double computeAbsoluteBearing(RPoint source, RPoint target) {
         return Utils.normalAbsoluteAngle(Math.atan2(target.x - source.x, target.y - source.y));
@@ -41,39 +34,12 @@ public abstract class RUtil {
         return (int) limit(0, value, numBins -1);
     }
     
-    /**
-     * Determines the power of a bullet given its velocity
-     * @param velocity
-     * @return the power of the bullet
-     */
     public static double computeBulletPower(double velocity) {
         return Math.max(0.1, (20.0 - velocity) / 3.0);
     }
     
-    /**
-     * Determines the velocity of a bullet given its power
-     * @param bulletPower
-     * @return the velocity of the bullet
-     */
     public static double computeBulletVelocity(double bulletPower) {
         return (20.0 - (3.0 * bulletPower));
-    }
-    
-    /**
-     * Computes the probability density function using a kernel density approximation
-     * @param distances
-     * @param h
-     * @return
-     */
-    public static double computeDensity(List<Double> distances, double h) {
-        double factor = 1.0 / (distances.size() * h);
-        double k_factor = 1.0 / Math.sqrt(Math.PI * 2);
-        
-        double sigma = 0;
-        for(int i = 0; i < distances.size(); i++)
-            sigma += Math.exp(-0.5 * Math.pow(distances.get(i) / h, 2));
-        
-        return sigma * factor * k_factor;
     }
     
     /**
