@@ -27,24 +27,52 @@ public class KDTree<T> {
 	}
 
 	public KDPoint<T> nearestNeighbor(KDPoint<T> query) {
-		return null;
+		NNSearch<T> search = new NNSearch<T>(query);
+		recursiveNearestNeighbor(this.root, search);
+		return search.best;
 	}
 	
+	// find nearest neighbor leaf
+	// unwind recursion
+	
 	protected void recursiveNearestNeighbor(KDNode<T> root, NNSearch<T> search) {
-		if (root.left == null && root.right == null) {
+		if (root == null) {
+			return;
+		}
+	
+		int featureIndex = root.featureIndex;
+	
+		// if the bucket hasn't split yet, so we're done here after finding the
+		// best if it exists
+		double distance = 0;
+		if (featureIndex < 0) {
 			for (KDPoint<T> point : root.bucket) {
-				double currentDist = point.distanceTo(search.query);
-				if (currentDist < search.bestDistance) {
-					search.bestDistance = currentDist;
+				distance = point.distanceTo(search.query);
+				if (distance < search.bestDistance) {
+					search.bestDistance = distance;
 					search.best = point;
 				}
 			}
 			return;
 		}
-		if (search.query.features[root.featureIndex] < root.value.features[root.featureIndex]) {
-			
+		
+		distance = root.value.distanceTo(search.query);
+		if (distance < search.bestDistance) {
+			search.bestDistance = distance;
+			search.best = root.value;
+		}
+		
+		KDNode<T> opposite = null;
+		if (search.query.features[featureIndex] < root.value.features[featureIndex]) {
+			recursiveNearestNeighbor(root.left, search);
+			opposite = root.right;
 		} else {
-			
+			recursiveNearestNeighbor(root.right, search);
+			opposite = root.left;
+		}
+		
+		if (Math.abs(search.query.features[featureIndex] - root.value.features[featureIndex]) < search.bestDistance) {
+			recursiveNearestNeighbor(opposite, search);
 		}
 	}
 }	
