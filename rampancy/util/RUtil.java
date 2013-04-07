@@ -51,83 +51,6 @@ public abstract class RUtil {
         return Math.asin(8.0 / velocity);
     }
     
-    public static double computePreciceMaxEscapeAngle(double bulletVelocity, RampantRobot reference, RPoint origin, int direction) {
-        RRobotState state = reference.getCurrentState();
-        double maxAngle = 0;
-        double distance = origin.distance(state.location);
-        double maxTicks = distance / bulletVelocity;
-        
-        // project perpendicular
-        double goAngle = computeAbsoluteBearing(origin, state.location);
-        
-        goAngle = wallSmoothing(state.location, goAngle + (Math.PI / 2.0) * direction, 
-                direction, 1000);
-        
-        MovSimStat stat = predictPosition(state.location, state.heading, goAngle, state.velocity, MovSim.defaultMaxVelocity, direction);
-        for(int i = 1; i < maxTicks + 1; i++) {
-            RPoint newLoc = new RPoint(stat.x, stat.y);
-            distance = origin.distance(newLoc);
-            goAngle = computeAbsoluteBearing(origin, newLoc);
-            
-            goAngle = wallSmoothing(state.location, goAngle + (Math.PI / 2.0) * direction, 
-                    direction, 1000);
-            stat = predictPosition(new RPoint(stat.x, stat.y), stat.h, goAngle, stat.v, MovSim.defaultMaxVelocity, direction);
-//            if(distance / bulletVelocity > i + 3)
-//                break;
-        }
-        
-        RPoint endPoint = new RPoint(stat.x, stat.y);
-        double absBearingToEnd = computeAbsoluteBearing(origin, endPoint);
-        double escapeAngle = absBearingToEnd - state.absoluteBearing;
-        return Math.abs(Utils.normalRelativeAngle(escapeAngle));
-    }
-    
-    public static double computePreciceMaxEscapeAngle(double bulletVelocity, RampantRobot reference, REnemyRobot enemy, int direction) {
-        RPoint origin = reference.getCopyOfLocation();
-        RRobotState enemyState = enemy.getCurrentState();
-        double maxAngle = 0;
-        double distance = origin.distance(enemyState.location);
-        double maxTicks = distance / bulletVelocity;
-        
-        // project perpendicular
-        double goAngle = computeAbsoluteBearing(origin, enemyState.location);
-        
-        goAngle = wallSmoothing(enemyState.location, goAngle + (Math.PI / 2.0) * direction, 
-                direction, 1000);
-        
-        MovSimStat stat = predictPosition(enemyState.location, enemyState.heading, goAngle, enemyState.velocity, MovSim.defaultMaxVelocity, direction);
-        for(int i = 1; i < maxTicks + 1; i++) {
-            RPoint newLoc = new RPoint(stat.x, stat.y);
-            distance = origin.distance(newLoc);
-            goAngle = computeAbsoluteBearing(origin, newLoc);
-            
-            goAngle = wallSmoothing(enemyState.location, goAngle + (Math.PI / 2.0) * direction, 
-                    direction, 1000);
-            stat = predictPosition(new RPoint(stat.x, stat.y), stat.h, goAngle, stat.v, MovSim.defaultMaxVelocity, direction);
-//            if(distance / bulletVelocity > i + 3)
-//                break;
-        }
-        
-        RPoint endPoint = new RPoint(stat.x, stat.y);
-        double absBearingToEnd = computeAbsoluteBearing(origin, endPoint);
-        double escapeAngle = absBearingToEnd - enemyState.absoluteBearing;
-        return Math.abs(Utils.normalRelativeAngle(escapeAngle));
-    }
-    
-    private static MovSimStat predictPosition(RPoint fromLocation, double currentHeading, double desiredHeading, double currentVelocity, double maxVelocity, double direction) {     
-        double angleToTurn = desiredHeading - currentHeading;
-        int moveDirection = 1;
-        if(Math.cos(angleToTurn) < 0) {
-            angleToTurn += Math.PI;
-            moveDirection = -1;
-        }
-        angleToTurn = Utils.normalRelativeAngle(angleToTurn);
-        RBattlefield bf = RampantRobot.getGlobalBattlefield();
-        MovSimStat[] nextTick = MovSim.futurePos(1, fromLocation.x, fromLocation.y, currentVelocity, maxVelocity, 
-                currentHeading, 1000 * moveDirection, angleToTurn, MovSim.defaultMaxTurnRate, bf.width, bf.height);     
-        return nextTick[0];
-    }
-    
     /**
      * @param location
      * @param wave
@@ -171,12 +94,11 @@ public abstract class RUtil {
      * @param point
      * @return the Point's distance from the wall
      */
-    public static double getDistanceFromWall(RPoint point) {
-        RBattlefield bf = RampantRobot.getGlobalBattlefield();
-        if(bf == null)
+    public static double getDistanceFromWall(RBattlefield battlefield, RPoint point) {
+        if(battlefield == null)
             return -1;
         
-        return bf.distanceFromWall(point);
+        return battlefield.distanceFromWall(point);
     }
     
     /**
