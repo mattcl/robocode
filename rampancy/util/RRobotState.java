@@ -46,7 +46,7 @@ public class RRobotState {
         this.breaking                 = !accelerating;
         this.deltaH                   = lastState == null ? 0 : heading - lastState.heading;
         this.distance                 = 0;
-        this.distanceFromWall         = RUtil.getDistanceFromWall(location);
+        this.distanceFromWall         = RUtil.getDistanceFromWall(battlefield, location);
         this.distanceFromWallCategory = battlefield.distanceFromWallCategory(location);
         this.timeSinceVelocityChange  = deltaV != 0 || lastState == null ? 0 : lastState.timeSinceVelocityChange + 1;
         this.directionTraveling       = lateralVelocity >= 0 ? 1 : -1;
@@ -78,7 +78,7 @@ public class RRobotState {
             this.breaking                 = !accelerating;
             this.deltaH                   = lastState == null ? 0 : heading - lastState.heading;
             this.distance                 = e.getDistance();
-            this.distanceFromWall         = RUtil.getDistanceFromWall(location);
+            this.distanceFromWall         = RUtil.getDistanceFromWall(battlefield, location);
             this.distanceFromWallCategory = battlefield.distanceFromWallCategory(location);
             this.timeSinceVelocityChange  = deltaV != 0 || lastState == null ? 0 : lastState.timeSinceVelocityChange + 1;
             this.directionTraveling       = lateralVelocity >= 0 ? 1 : -1;

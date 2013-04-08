@@ -19,6 +19,7 @@ public abstract class RampantRobot extends AdvancedRobot {
 	public RampantRobot() {
 		super();
 		stateHistory = new LinkedList<RRobotState>();
+		location = null;
 	}
 	
 	public void run() {
@@ -27,7 +28,8 @@ public abstract class RampantRobot extends AdvancedRobot {
 		setAdjustRadarForGunTurn(true);
 		setAdjustRadarForRobotTurn(true);
 		globalBattlefield = new RBattlefield((int) getBattleFieldWidth(), (int) getBattleFieldHeight());
-		turnRadarRightRadians(Double.POSITIVE_INFINITY);
+		setTurnRadarRightRadians(Double.POSITIVE_INFINITY);
+		location = new RPoint(getX(), getY());
 		while (true) {
 			scan();
 		}
@@ -48,6 +50,6 @@ public abstract class RampantRobot extends AdvancedRobot {
 	}
 	
 	public RPoint getLocation() {
-		return new RPoint(getX(), getY());
+		return location;
 	}
 }
