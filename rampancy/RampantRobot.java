@@ -3,6 +3,7 @@ package rampancy;
 import java.util.LinkedList;
 
 import rampancy.util.RBattlefield;
+import rampancy.util.REnemyManager;
 import rampancy.util.RPoint;
 import rampancy.util.RRobotState;
 import robocode.AdvancedRobot;
@@ -12,6 +13,7 @@ import robocode.util.Utils;
 public abstract class RampantRobot extends AdvancedRobot {
 	
 	public static RBattlefield globalBattlefield;
+	public static REnemyManager enemyManager;
 	
 	protected RPoint location;
 	protected LinkedList<RRobotState> stateHistory;
@@ -27,7 +29,13 @@ public abstract class RampantRobot extends AdvancedRobot {
 		setAdjustGunForRobotTurn(true);
 		setAdjustRadarForGunTurn(true);
 		setAdjustRadarForRobotTurn(true);
+		
 		globalBattlefield = new RBattlefield((int) getBattleFieldWidth(), (int) getBattleFieldHeight());
+	
+		if (enemyManager == null) {
+			enemyManager = new REnemyManager();
+		}
+		
 		setTurnRadarRightRadians(Double.POSITIVE_INFINITY);
 		location = new RPoint(getX(), getY());
 		while (true) {

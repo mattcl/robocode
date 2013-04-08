@@ -5,7 +5,6 @@ package rampancy.util;
 
 import java.awt.Graphics2D;
 
-import rampancy.RampantRobot;
 import robocode.AdvancedRobot;
 import robocode.util.Utils;
 
@@ -57,17 +56,17 @@ public abstract class RUtil {
      * @param attackAngle
      * @param direction
      * @return the appropriate orbit angle
-     */
+     *
     public static double computeOrbitAngle(RPoint location, REnemyWave wave, double attackAngle, int direction) {
         double goAngle = RUtil.computeAbsoluteBearing(wave.getOrigin(), location);
         goAngle = RUtil.wallSmoothing(location, goAngle + (direction * (Math.PI / 2 + attackAngle)), direction, wave.getOrigin().distance(location));
         return goAngle;
-    }
+    }*/
     
-    public static double computeOrbitAngle(RPoint location, REnemyRobot enemy, double attackAngle, int direction) {
+    public static double computeOrbitAngle(RBattlefield battlefield, RPoint location, REnemyRobot enemy, double attackAngle, int direction) {
         RRobotState state = enemy.getCurrentState();
         double goAngle = RUtil.computeAbsoluteBearing(state.location, location);
-        return RUtil.wallSmoothing(state.location, goAngle + (Math.PI / 2.0 + attackAngle) * direction, direction, state.distance);
+        return RUtil.wallSmoothing(battlefield, state.location, goAngle + (Math.PI / 2.0 + attackAngle) * direction, direction, state.distance);
     }
     
     /**
@@ -103,12 +102,12 @@ public abstract class RUtil {
     
     /**
      * returns the factor index for the statistics array
-     */
+     *
     public static int getFactorIndex(REnemyWave wave, RPoint target, int numBins) {
         double offsetAngle = wave.computeOffsetAngle(target);
         double factor = Utils.normalRelativeAngle(offsetAngle) / RUtil.computeMaxEscapeAngle(wave.getVelocity()) * wave.getDirection();
         return computeBin(factor, numBins);
-    }
+    }*/
     
     /**
      * @param index
@@ -350,8 +349,7 @@ public abstract class RUtil {
      * @param distanceToCenterOfOrbit
      * @return the wall smoothed angle
      */
-    public static double wallSmoothing(RPoint location, double goAngle, int direction, double distanceToCenterOfOrbit) {
-        RBattlefield bf = RampantRobot.getGlobalBattlefield();
+    public static double wallSmoothing(RBattlefield bf, RPoint location, double goAngle, int direction, double distanceToCenterOfOrbit) {
         double wallStick = Math.min(distanceToCenterOfOrbit, WALL_STICK);
         
         RPoint projectedLocation = project(location, goAngle, wallStick);
