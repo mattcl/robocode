@@ -60,7 +60,6 @@ public class Swingline extends AdvancedRobot {
                 }
                 gunAngle = Utils.normalRelativeAngle(computeAbsoluteBearing(myLocation, target) - getGunHeadingRadians());
             }
-
         }
 
         if (gunAngle != 100) {

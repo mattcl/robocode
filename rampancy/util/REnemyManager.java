@@ -1,6 +1,7 @@
 package rampancy.util;
 
 import java.util.HashMap;
+import java.util.Iterator;
 
 public class REnemyManager {
 	
@@ -20,5 +21,9 @@ public class REnemyManager {
 	
 	public boolean contains(String name) {
 		return enemies.containsKey(name);
+	}
+	
+	public Iterator<REnemyRobot> iterator() {
+		return enemies.values().iterator();
 	}
 }

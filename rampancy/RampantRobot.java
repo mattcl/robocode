@@ -1,9 +1,12 @@
 package rampancy;
 
+import java.awt.Graphics2D;
+import java.util.Iterator;
 import java.util.LinkedList;
 
 import rampancy.util.RBattlefield;
 import rampancy.util.REnemyManager;
+import rampancy.util.REnemyRobot;
 import rampancy.util.RPoint;
 import rampancy.util.RRobotState;
 import robocode.AdvancedRobot;
@@ -45,12 +48,27 @@ public abstract class RampantRobot extends AdvancedRobot {
 	
 	public void onScannedRobot(ScannedRobotEvent e) {
 		doRadar(e);
+		String name = e.getName();
+		if (!enemyManager.contains(name)) {
+			enemyManager.add(name);
+		}
+		REnemyRobot enemy = enemyManager.get(name);
+		enemy.update(this, globalBattlefield, e);
 	}
 	
 	public void doRadar(ScannedRobotEvent e) {
 		double factor = 2.0;
 		double radarTurn = getHeadingRadians() + e.getBearingRadians() - getRadarHeadingRadians();
 		setTurnRadarRightRadians(factor * Utils.normalRelativeAngle(radarTurn));
+	}
+	
+	public void onPaint(Graphics2D g) {
+		globalBattlefield.draw(g);
+		
+		Iterator<REnemyRobot> iter = enemyManager.iterator();
+		while (iter.hasNext()) {
+			iter.next().draw(g);
+		}
 	}
 	
 	public RRobotState getCurrentState() {

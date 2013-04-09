@@ -104,7 +104,9 @@ public class RBattlefield {
     }
     
     public void draw(Graphics2D g) {
+    	Color lastColor = g.getColor();
         g.setColor(Color.gray);
         g.drawRect(innerRect.x, innerRect.y, innerRect.width, innerRect.height);
+        g.setColor(lastColor);
     }
 }
