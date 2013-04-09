@@ -9,6 +9,9 @@ import rampancy.util.REnemyManager;
 import rampancy.util.REnemyRobot;
 import rampancy.util.RPoint;
 import rampancy.util.RRobotState;
+import rampancy.util.gun.RCircularTargetingGun;
+import rampancy.util.gun.RFiringSolution;
+import rampancy.util.gun.RGun;
 import robocode.AdvancedRobot;
 import robocode.ScannedRobotEvent;
 import robocode.util.Utils;
@@ -17,6 +20,10 @@ public abstract class RampantRobot extends AdvancedRobot {
 	
 	public static RBattlefield globalBattlefield;
 	public static REnemyManager enemyManager;
+	
+	public static RBattlefield getGlobalBattlefield() {
+		return globalBattlefield;
+	}
 	
 	protected RPoint location;
 	protected LinkedList<RRobotState> stateHistory;
@@ -54,6 +61,13 @@ public abstract class RampantRobot extends AdvancedRobot {
 		}
 		REnemyRobot enemy = enemyManager.get(name);
 		enemy.update(this, globalBattlefield, e);
+		
+		RGun gun = new RCircularTargetingGun();
+		RFiringSolution firingSolution = gun.getFiringSolution(this, enemy);
+		if (firingSolution != null) {
+			setTurnGunRightRadians(Utils.normalRelativeAngle(firingSolution.firingAngle - getGunHeadingRadians()));
+			setFireBullet(firingSolution.power);
+		}
 	}
 	
 	public void doRadar(ScannedRobotEvent e) {
