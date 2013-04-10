@@ -116,7 +116,6 @@ public abstract class RampantRobot extends AdvancedRobot {
     }
 
     protected boolean attemptShot() {
-
         if(!processingShot) {
             return false;
         }
@@ -140,7 +139,6 @@ public abstract class RampantRobot extends AdvancedRobot {
             processingShot = true;
             return true;
         }
-
         return false;
     }
 }
