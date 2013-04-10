@@ -9,7 +9,6 @@ import rampancy.util.RPoint;
 import rampancy.util.RRobotState;
 import rampancy.util.RUtil;
 import rampancy.util.gun.RFiringSolution;
-import robocode.util.Utils;
 
 public class RBulletWave extends RWave {
 	
