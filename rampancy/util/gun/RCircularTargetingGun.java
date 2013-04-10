@@ -30,8 +30,8 @@ public class RCircularTargetingGun extends RGun {
 		RPoint referenceLocation = reference.getLocation();
 		
 		// TODO: compute this somehow
-		double maxBulletPower = 2.0;
-		double minBulletPower = 0.5;
+		double maxBulletPower = 2.5;
+		double minBulletPower = 0.1;
 		double bestPower = 0;
 		double bestAngle = 0;
 		ArrayList<Option> options = new ArrayList<Option>();
@@ -49,7 +49,7 @@ public class RCircularTargetingGun extends RGun {
 			}
 		}
 		if (!options.isEmpty()) {
-			return new Solution(bestPower, bestAngle, options);
+			return new Solution(enemy, bestPower, bestAngle, options);
 		}
 		return null;
 	}
@@ -57,8 +57,8 @@ public class RCircularTargetingGun extends RGun {
 	class Solution extends RFiringSolution {
 		ArrayList<Option> options;
 
-		public Solution(double power, double firingAngle, ArrayList<Option> options) {
-			super(power, firingAngle);
+		public Solution(REnemyRobot target, double power, double firingAngle, ArrayList<Option> options) {
+			super(target, power, firingAngle);
 			this.options = options;
 		}
 
@@ -69,6 +69,7 @@ public class RCircularTargetingGun extends RGun {
 			for (Option option : options) {
 				option.draw(g);
 			}
+			RUtil.drawOval(options.get(options.size() - 1).target, 5, g);
 			g.setColor(lastColor);
 		}
 	}

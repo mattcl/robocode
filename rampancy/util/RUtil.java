@@ -406,14 +406,14 @@ public abstract class RUtil {
         return Math.abs((v1 - v2) / sum);
     }
    
-    /*
     public static boolean pointOnRobotPoint(RPoint point, RPoint robotLocation) {
         int radius = REnemyRobot.BOT_RADIUS;
         return (point.x >= robotLocation.x - radius && point.x <= robotLocation.x + radius) && (point.y >= robotLocation.y - radius && point.y <= robotLocation.y + radius);
     }
+    
     public static boolean pointOnRobot(RPoint point, REnemyRobot enemy) {
         RPoint enemyLocation = enemy.getCurrentState().location;
         int radius = REnemyRobot.BOT_RADIUS;
         return (point.x >= enemyLocation.x - radius && point.x <= enemyLocation.x + radius) && (point.y >= enemyLocation.y - radius && point.y <= enemyLocation.y + radius);
-    }*/
+    }
 }
