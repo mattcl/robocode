@@ -41,6 +41,7 @@ public class RBulletWave extends RWave {
 		this.bulletLocation = this.origin.getCopy();
 		this.largestAbsB = Double.NEGATIVE_INFINITY;
 		this.smallestAbsB = Double.POSITIVE_INFINITY;
+		this.firingSolution.gun.noteShotFired(isVirtual);
 	}
 	
 	public void update(long time) {
@@ -61,8 +62,9 @@ public class RBulletWave extends RWave {
 				}
 			}
 		}
-		if (RUtil.pointOnRobot(bulletLocation, target)) {
+		if (!didHit && RUtil.pointOnRobot(bulletLocation, target)) {
 			didHit = true;
+			firingSolution.gun.noteShotHit(isVirtual);
 		}
 	}
 	

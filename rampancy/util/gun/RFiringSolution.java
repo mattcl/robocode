@@ -12,6 +12,7 @@ public class RFiringSolution implements RDrawable {
 	public double firingAngle;
 	
 	public RFiringSolution(RGun gun, REnemyRobot target, double power, double firingAngle) {
+		this.gun = gun;
 		this.target = target;
 		this.power = power;
 		this.firingAngle = firingAngle;
