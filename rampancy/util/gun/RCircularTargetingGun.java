@@ -49,7 +49,7 @@ public class RCircularTargetingGun extends RGun {
 			}
 		}
 		if (!options.isEmpty()) {
-			return new Solution(enemy, bestPower, bestAngle, options);
+			return new Solution(this, enemy, bestPower, bestAngle, options);
 		}
 		return null;
 	}
@@ -57,8 +57,8 @@ public class RCircularTargetingGun extends RGun {
 	class Solution extends RFiringSolution {
 		ArrayList<Option> options;
 
-		public Solution(REnemyRobot target, double power, double firingAngle, ArrayList<Option> options) {
-			super(target, power, firingAngle);
+		public Solution(RGun gun, REnemyRobot target, double power, double firingAngle, ArrayList<Option> options) {
+			super(gun, target, power, firingAngle);
 			this.options = options;
 		}
 

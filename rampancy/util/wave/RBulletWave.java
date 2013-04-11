@@ -12,6 +12,8 @@ import rampancy.util.gun.RFiringSolution;
 
 public class RBulletWave extends RWave {
 	
+	public static final Color WAVE_COLOR = new Color(0x3B3B3B);
+	
 	protected RFiringSolution firingSolution;
 	protected REnemyRobot target;
 	protected RRobotState creatorState;
@@ -44,7 +46,7 @@ public class RBulletWave extends RWave {
 	
 	public boolean didBreak() {
 		// TODO: make this more accurate
-		return (distanceTraveled > target.getCurrentState().location.distance(origin) + 50);
+		return (distanceTraveled > target.getCurrentState().location.distance(origin) + 100);
 	}
 	
 	public boolean didHitEnemy() {
@@ -53,6 +55,9 @@ public class RBulletWave extends RWave {
 
 	@Override
 	public void draw(Graphics2D g) {
+		g.setColor(WAVE_COLOR);
+		RUtil.drawOval(origin, (int)(distanceTraveled - velocity), g);
+		RUtil.drawOval(origin, (int)distanceTraveled, g);
 		firingSolution.draw(g);
 		RUtil.drawOval(bulletLocation, 5, g);
 	}

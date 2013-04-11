@@ -3,6 +3,7 @@ package rampancy.util.wave;
 import java.awt.Color;
 
 import rampancy.util.RDrawable;
+import rampancy.util.REnemyRobot;
 import rampancy.util.RPoint;
 import rampancy.util.RUtil;
 
@@ -68,6 +69,13 @@ abstract public class RWave implements RDrawable {
 
 	public boolean isVirtual() {
 		return isVirtual;
+	}
+	
+	public void computeIntersection(RPoint botLocation) {
+		RPoint topLeft = new RPoint(botLocation.x - REnemyRobot.BOT_RADIUS, botLocation.y + REnemyRobot.BOT_RADIUS);
+		RPoint topRight = new RPoint(botLocation.x + REnemyRobot.BOT_RADIUS, botLocation.y + REnemyRobot.BOT_RADIUS);
+		RPoint bottomLeft = new RPoint(botLocation.x - REnemyRobot.BOT_RADIUS, botLocation.y - REnemyRobot.BOT_RADIUS);
+		RPoint bottoimRight = new RPoint(botLocation.x + REnemyRobot.BOT_RADIUS, botLocation.y - REnemyRobot.BOT_RADIUS);
 	}
 	
 	@Override

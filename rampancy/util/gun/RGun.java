@@ -21,5 +21,13 @@ public abstract class RGun {
 		return toString();
 	}
 	
+	public void noteShotFired(boolean isVirtual) {
+		stat.noteShotFired(isVirtual);
+	}
+	
+	public void noteShotHit(boolean isVirtual) {
+		stat.noteShotHit(isVirtual);
+	}
+	
 	abstract public RFiringSolution getFiringSolution(RampantRobot reference, REnemyRobot enemy);
 }

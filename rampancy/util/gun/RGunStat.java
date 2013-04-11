@@ -24,10 +24,16 @@ public class RGunStat {
 	}
 	
 	public double getRealHitPercentage() {
+		if (realShotsFired == 0) {
+			return 0.0;
+		}
 		return ((double) realShotsHit / (double) realShotsFired) * 100;
 	}
 	
 	public double getVirtualHitPercentage() {
+		if (virtualShotsFired == 0) {
+			return 0.0;
+		}
 		return ((double) virtualShotsHit / (double) virtualShotsFired) * 100;
 	}
 }

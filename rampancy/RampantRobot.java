@@ -3,6 +3,7 @@ package rampancy;
 import java.awt.Graphics2D;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 
 import rampancy.util.RBattlefield;
 import rampancy.util.REnemyManager;
@@ -12,9 +13,13 @@ import rampancy.util.RRobotState;
 import rampancy.util.gun.RCircularTargetingGun;
 import rampancy.util.gun.RFiringSolution;
 import rampancy.util.gun.RGun;
+import rampancy.util.gun.RGunManager;
 import rampancy.util.wave.RBulletWave;
 import rampancy.util.wave.RWaveManager;
 import robocode.AdvancedRobot;
+import robocode.Bullet;
+import robocode.BulletHitEvent;
+import robocode.RoundEndedEvent;
 import robocode.ScannedRobotEvent;
 import robocode.util.Utils;
 
@@ -23,6 +28,7 @@ public abstract class RampantRobot extends AdvancedRobot {
     public static RBattlefield globalBattlefield;
     public static REnemyManager enemyManager;
     public static RWaveManager waveManager;
+    public static RGunManager gunManager;
 
     public static RBattlefield getGlobalBattlefield() {
         return globalBattlefield;
@@ -52,6 +58,11 @@ public abstract class RampantRobot extends AdvancedRobot {
         if (enemyManager == null) {
             enemyManager = new REnemyManager();
         }
+        
+        if (gunManager == null) {
+        	gunManager = new RGunManager();
+        	gunManager.add(new RCircularTargetingGun());
+        }
 
         waveManager = new RWaveManager();
 
@@ -74,10 +85,9 @@ public abstract class RampantRobot extends AdvancedRobot {
 
         waveManager.update(this);
 
-        RGun gun = new RCircularTargetingGun();
-        RFiringSolution firingSolution = gun.getFiringSolution(this, enemy);
-        if (firingSolution != null) {
-            lockFiringSolution(enemy, firingSolution);
+        List<RFiringSolution> firingSolutions = gunManager.getFiringSolutions(this, enemy);
+        if (!firingSolutions.isEmpty()) {
+            lockFiringSolution(enemy, firingSolutions.get(0));
         } else if (!processingShot) {
             setTurnGunRightRadians(enemy.getCurrentState().absoluteBearing - getGunHeadingRadians());
         }
@@ -85,6 +95,18 @@ public abstract class RampantRobot extends AdvancedRobot {
         if (attemptShot()) {
             processingShot = false;
         }
+    }
+    
+    public void onBulletHit(BulletHitEvent e) {
+    	Bullet bullet = e.getBullet();
+    	REnemyRobot enemy = enemyManager.get(e.getName());
+		if(enemy == null) {
+			return;
+		}
+    }
+    
+    public void onRoundEnded(RoundEndedEvent e) {
+    	out.print(gunManager);
     }
 
     public void doRadar(ScannedRobotEvent e) {
