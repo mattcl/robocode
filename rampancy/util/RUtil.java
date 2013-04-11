@@ -69,6 +69,10 @@ public abstract class RUtil {
         return RUtil.wallSmoothing(battlefield, state.location, goAngle + (Math.PI / 2.0 + attackAngle) * direction, direction, state.distance);
     }
     
+    public static void drawLine(RPoint p1, RPoint p2, Graphics2D g) {
+    	g.drawLine((int) p1.x, (int) p1.y, (int) p2.x, (int) p2.y);
+    }
+    
     /**
      * Draws an oval using the passed point and radius
      * @param point

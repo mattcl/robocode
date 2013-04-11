@@ -1,6 +1,8 @@
 package rampancy.util.wave;
 
 import java.awt.Color;
+import java.util.ArrayList;
+import java.util.List;
 
 import rampancy.util.RDrawable;
 import rampancy.util.REnemyRobot;
@@ -71,11 +73,78 @@ abstract public class RWave implements RDrawable {
 		return isVirtual;
 	}
 	
-	public void computeIntersection(RPoint botLocation) {
-		RPoint topLeft = new RPoint(botLocation.x - REnemyRobot.BOT_RADIUS, botLocation.y + REnemyRobot.BOT_RADIUS);
-		RPoint topRight = new RPoint(botLocation.x + REnemyRobot.BOT_RADIUS, botLocation.y + REnemyRobot.BOT_RADIUS);
-		RPoint bottomLeft = new RPoint(botLocation.x - REnemyRobot.BOT_RADIUS, botLocation.y - REnemyRobot.BOT_RADIUS);
-		RPoint bottoimRight = new RPoint(botLocation.x + REnemyRobot.BOT_RADIUS, botLocation.y - REnemyRobot.BOT_RADIUS);
+	public List<RPoint> computeIntersections(RPoint botLocation) {
+		ArrayList<RPoint> intersections = new ArrayList<RPoint>();
+		double innerRadius = distanceTraveled - velocity;
+		double outerRadius = distanceTraveled;
+		double topY = botLocation.y + REnemyRobot.BOT_RADIUS;
+		double botY = botLocation.y - REnemyRobot.BOT_RADIUS;
+		double leftX = botLocation.x - REnemyRobot.BOT_RADIUS;
+		double rightX = botLocation.x + REnemyRobot.BOT_RADIUS;
+
+		evaluateXCandidates(leftX, topY, botY, innerRadius, outerRadius, intersections);
+		evaluateXCandidates(rightX, topY, botY, innerRadius, outerRadius, intersections);
+		evaluateYCandidates(topY, leftX, rightX, innerRadius, outerRadius, intersections);
+		evaluateYCandidates(botY, leftX, rightX, innerRadius, outerRadius, intersections);
+		return intersections;
+	}
+
+	// TODO: account for corner points
+	// TODO: refactor the next two methods
+	protected void evaluateXCandidates(double x, double topY, double botY, double innerRadius, double outerRadius, List<RPoint> intersections) {
+		double diff = Math.abs(x - origin.x);
+		if (diff > outerRadius) {
+			return;
+		}
+		
+		double outerOffset = Math.sqrt(outerRadius * outerRadius - diff * diff);
+		double innerOffset = Math.sqrt(innerRadius * innerRadius - diff * diff);
+		
+		double candidate = origin.y + outerOffset;
+		if (candidate <= topY && candidate >= botY) {
+			intersections.add(new RPoint(x, candidate));
+		}
+		candidate = origin.y - outerOffset;
+		if (outerOffset != 0 && candidate <= topY && candidate >= botY) {
+			intersections.add(new RPoint(x, candidate));
+		}
+		
+		candidate = origin.y + innerOffset;
+		if (candidate <= topY && candidate >= botY) {
+			intersections.add(new RPoint(x, candidate));
+		}
+		candidate = origin.y - innerOffset;
+		if (innerOffset != 0 && candidate <= topY && candidate >= botY) {
+			intersections.add(new RPoint(x, candidate));
+		}
+	}
+	
+	protected void evaluateYCandidates(double y, double leftX, double rightX, double innerRadius, double outerRadius, List<RPoint> intersections) {
+		double diff = Math.abs(y - origin.y);
+		if (diff > outerRadius) {
+			return;
+		}
+		
+		double outerOffset = Math.sqrt(outerRadius * outerRadius - diff * diff);
+		double innerOffset = Math.sqrt(innerRadius * innerRadius - diff * diff);
+		
+		double candidate = origin.x + outerOffset;
+		if (candidate <= rightX && candidate >= leftX) {
+			intersections.add(new RPoint(candidate, y));
+		}
+		candidate = origin.x - outerOffset;
+		if (candidate <= rightX && candidate >= leftX) {
+			intersections.add(new RPoint(candidate, y));
+		}
+		
+		candidate = origin.x + innerOffset;
+		if (candidate <= rightX && candidate >= leftX) {
+			intersections.add(new RPoint(candidate, y));
+		}
+		candidate = origin.x - innerOffset;
+		if (candidate <= rightX && candidate >= leftX) {
+			intersections.add(new RPoint(candidate, y));
+		}
 	}
 	
 	@Override

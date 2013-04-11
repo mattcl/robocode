@@ -2,6 +2,7 @@ package rampancy.util.wave;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.util.List;
 
 import rampancy.RampantRobot;
 import rampancy.util.REnemyRobot;
@@ -19,6 +20,10 @@ public class RBulletWave extends RWave {
 	protected RRobotState creatorState;
 	protected RRobotState initialState;
 	protected RPoint bulletLocation;
+	protected double smallestAbsB;
+	protected double largestAbsB;
+	protected RPoint smallestIntersection;
+	protected RPoint largestIntersection;
 	protected double absoluteFiringAngle;
 	protected boolean didHit;
 
@@ -34,11 +39,28 @@ public class RBulletWave extends RWave {
 		this.initialState = target.getCurrentState().getCopy();
 		this.absoluteFiringAngle = firingSolution.firingAngle;
 		this.bulletLocation = this.origin.getCopy();
+		this.largestAbsB = Double.NEGATIVE_INFINITY;
+		this.smallestAbsB = Double.POSITIVE_INFINITY;
 	}
 	
 	public void update(long time) {
 		super.update(time);
 		bulletLocation = RUtil.project(origin, absoluteFiringAngle, distanceTraveled);
+		List<RPoint> intersections = computeIntersections(target.getCurrentState().location);
+		if (!intersections.isEmpty()) {
+			// compute widest intersection
+			for (RPoint point : intersections) {
+				double absB = origin.computeAbsoluteBearingTo(point);
+				if (absB < smallestAbsB) {
+					smallestAbsB = absB;
+					smallestIntersection = point;
+				}
+				if (absB > largestAbsB) {
+					largestAbsB = absB;
+					largestIntersection = point;
+				}
+			}
+		}
 		if (RUtil.pointOnRobot(bulletLocation, target)) {
 			didHit = true;
 		}
@@ -46,7 +68,7 @@ public class RBulletWave extends RWave {
 	
 	public boolean didBreak() {
 		// TODO: make this more accurate
-		return (distanceTraveled > target.getCurrentState().location.distance(origin) + 100);
+		return (distanceTraveled > target.getCurrentState().location.distance(origin) + 50);
 	}
 	
 	public boolean didHitEnemy() {
@@ -58,6 +80,12 @@ public class RBulletWave extends RWave {
 		g.setColor(WAVE_COLOR);
 		RUtil.drawOval(origin, (int)(distanceTraveled - velocity), g);
 		RUtil.drawOval(origin, (int)distanceTraveled, g);
+		if (smallestIntersection != null) {
+			RUtil.drawLine(origin, origin.projectTo(smallestAbsB, distanceTraveled), g);
+		}
+		if (largestIntersection != null) {
+			RUtil.drawLine(origin, origin.projectTo(largestAbsB, distanceTraveled), g);
+		}
 		firingSolution.draw(g);
 		RUtil.drawOval(bulletLocation, 5, g);
 	}
