@@ -45,11 +45,19 @@ public class RBulletWave extends RWave {
 		this.firingSolution.gun.noteShotFired(isVirtual);
 	}
 	
-	public double getMaxGuessFactor() {
+	public RFiringSolution getFiringSolution() {
+		return firingSolution;
+	}
+	
+	public RRobotState getInitialState() {
+		return initialState;
+	}
+	
+	public double getGuessFactorForLargest() {
 		return getGuessFactor(largestAbsB);
 	}
 	
-	public double getMinGussFactor() {
+	public double getGuessFactorForSmallest() {
 		return getGuessFactor(smallestAbsB);
 	}
 	
@@ -99,12 +107,12 @@ public class RBulletWave extends RWave {
 		if (smallestIntersection != null) {
 			RUtil.drawLine(origin, origin.projectTo(smallestAbsB, distanceTraveled), g);
 			RPoint midpoint = origin.projectTo(smallestAbsB, distanceTraveled / 2);
-			g.drawString("" + RUtil.roundToPrecision(getMinGussFactor(), 2), (int) midpoint.x, (int) midpoint.y);
+			g.drawString("" + RUtil.roundToPrecision(getGuessFactorForSmallest(), 2), (int) midpoint.x, (int) midpoint.y);
 		}
 		if (largestIntersection != null) {
 			RUtil.drawLine(origin, origin.projectTo(largestAbsB, distanceTraveled), g);
 			RPoint midpoint = origin.projectTo(largestAbsB, distanceTraveled / 2);
-			g.drawString("" + RUtil.roundToPrecision(getMaxGuessFactor(), 2), (int) midpoint.x, (int) midpoint.y);
+			g.drawString("" + RUtil.roundToPrecision(getGuessFactorForLargest(), 2), (int) midpoint.x, (int) midpoint.y);
 		}
 		firingSolution.draw(g);
 		RUtil.drawOval(bulletLocation, 5, g);

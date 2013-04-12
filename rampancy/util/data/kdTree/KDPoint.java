@@ -2,7 +2,7 @@ package rampancy.util.data.kdTree;
 
 import java.util.Arrays;
 
-class KDPoint<T> {
+public class KDPoint<T> {
 	T value;
 	double[] features;
 	

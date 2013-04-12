@@ -283,6 +283,14 @@ public abstract class RUtil {
         return RUtil.limit(min, (value + offset) * percentDiff, max);
     }
     
+    public static double normalize(double value) {
+    	return normalize(value, 1);
+    }
+    
+    public static double normalize(double value, double weight) {
+    	return 1.0 / (1.0 + weight * value);
+    }
+    
     /**
      * Credit: Voidious
      * @param robot

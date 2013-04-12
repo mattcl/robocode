@@ -5,6 +5,7 @@ import java.util.List;
 
 import rampancy.RampantRobot;
 import rampancy.util.REnemyRobot;
+import rampancy.util.wave.RBulletWave;
 
 public class RGunManager {
 	
@@ -27,6 +28,12 @@ public class RGunManager {
 			}
 		}
 		return firingSolutions;
+	}
+	
+	public void updateGuns(RampantRobot reference, RBulletWave wave) {
+		for (RGun gun : guns) {
+			gun.update(reference, wave);
+		}
 	}
 	
 	public String toString() {

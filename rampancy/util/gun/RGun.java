@@ -2,6 +2,7 @@ package rampancy.util.gun;
 
 import rampancy.RampantRobot;
 import rampancy.util.REnemyRobot;
+import rampancy.util.wave.RBulletWave;
 
 public abstract class RGun {
 
@@ -27,6 +28,10 @@ public abstract class RGun {
 	
 	public void noteShotHit(boolean isVirtual) {
 		stat.noteShotHit(isVirtual);
+	}
+	
+	public void update(RampantRobot reference, RBulletWave wave) {
+		// do nothing
 	}
 	
 	abstract public RFiringSolution getFiringSolution(RampantRobot reference, REnemyRobot enemy);
