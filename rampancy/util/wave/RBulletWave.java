@@ -10,6 +10,7 @@ import rampancy.util.RPoint;
 import rampancy.util.RRobotState;
 import rampancy.util.RUtil;
 import rampancy.util.gun.RFiringSolution;
+import robocode.util.Utils;
 
 public class RBulletWave extends RWave {
 	
@@ -42,6 +43,19 @@ public class RBulletWave extends RWave {
 		this.largestAbsB = Double.NEGATIVE_INFINITY;
 		this.smallestAbsB = Double.POSITIVE_INFINITY;
 		this.firingSolution.gun.noteShotFired(isVirtual);
+	}
+	
+	public double getMaxGuessFactor() {
+		return getGuessFactor(largestAbsB);
+	}
+	
+	public double getMinGussFactor() {
+		return getGuessFactor(smallestAbsB);
+	}
+	
+	protected double getGuessFactor(double desiredAbsB) {
+		double angleOffset = Utils.normalRelativeAngle(desiredAbsB - initialState.absoluteBearing);
+		return Math.max(-1, Math.min(1, angleOffset / RUtil.computeMaxEscapeAngle(velocity))) * initialState.directionTraveling;
 	}
 	
 	public void update(long time) {
@@ -84,9 +98,13 @@ public class RBulletWave extends RWave {
 		RUtil.drawOval(origin, (int)distanceTraveled, g);
 		if (smallestIntersection != null) {
 			RUtil.drawLine(origin, origin.projectTo(smallestAbsB, distanceTraveled), g);
+			RPoint midpoint = origin.projectTo(smallestAbsB, distanceTraveled / 2);
+			g.drawString("" + RUtil.roundToPrecision(getMinGussFactor(), 2), (int) midpoint.x, (int) midpoint.y);
 		}
 		if (largestIntersection != null) {
 			RUtil.drawLine(origin, origin.projectTo(largestAbsB, distanceTraveled), g);
+			RPoint midpoint = origin.projectTo(largestAbsB, distanceTraveled / 2);
+			g.drawString("" + RUtil.roundToPrecision(getMaxGuessFactor(), 2), (int) midpoint.x, (int) midpoint.y);
 		}
 		firingSolution.draw(g);
 		RUtil.drawOval(bulletLocation, 5, g);
