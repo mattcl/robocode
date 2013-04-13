@@ -10,8 +10,10 @@ import rampancy.util.REnemyManager;
 import rampancy.util.REnemyRobot;
 import rampancy.util.RPoint;
 import rampancy.util.RRobotState;
+import rampancy.util.gun.RCircularTargetingGun;
 import rampancy.util.gun.RDynamicClusteringGun;
 import rampancy.util.gun.RFiringSolution;
+import rampancy.util.gun.RGun;
 import rampancy.util.gun.RGunManager;
 import rampancy.util.wave.RBulletWave;
 import rampancy.util.wave.RWaveManager;
@@ -20,6 +22,7 @@ import robocode.Bullet;
 import robocode.BulletHitEvent;
 import robocode.RoundEndedEvent;
 import robocode.ScannedRobotEvent;
+import robocode.SkippedTurnEvent;
 import robocode.util.Utils;
 
 public abstract class RampantRobot extends AdvancedRobot {
@@ -32,7 +35,7 @@ public abstract class RampantRobot extends AdvancedRobot {
     public static RBattlefield getGlobalBattlefield() {
         return globalBattlefield;
     }
-    
+
     public static RGunManager getGunManager() {
     	return gunManager;
     }
@@ -61,10 +64,10 @@ public abstract class RampantRobot extends AdvancedRobot {
         if (enemyManager == null) {
             enemyManager = new REnemyManager();
         }
-        
+
         if (gunManager == null) {
         	gunManager = new RGunManager();
-        	//gunManager.add(new RCircularTargetingGun());
+        	gunManager.add(new RCircularTargetingGun());
         	gunManager.add(new RDynamicClusteringGun());
         }
 
@@ -100,7 +103,7 @@ public abstract class RampantRobot extends AdvancedRobot {
             processingShot = false;
         }
     }
-    
+
     public void onBulletHit(BulletHitEvent e) {
     	Bullet bullet = e.getBullet();
     	REnemyRobot enemy = enemyManager.get(e.getName());
@@ -108,10 +111,17 @@ public abstract class RampantRobot extends AdvancedRobot {
 			return;
 		}
     }
-    
+
     public void onRoundEnded(RoundEndedEvent e) {
     	out.print(gunManager);
+    	gunManager.updateEndOfRound(this);
     }
+    
+	public void onSkippedTurn(SkippedTurnEvent event) {
+		super.onSkippedTurn(event);
+		System.out.println("Skipped turn!");
+        out.println("Skipped turn!");
+	}
 
     public void doRadar(ScannedRobotEvent e) {
         double factor = 2.0;
@@ -137,7 +147,7 @@ public abstract class RampantRobot extends AdvancedRobot {
         return stateHistory.get(0);
     }
 
-    public RPoint getLocation() {
+	public RPoint getLocation() {
         return location;
     }
 

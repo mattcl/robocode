@@ -10,45 +10,87 @@ import rampancy.util.RUtil;
 import rampancy.util.data.kdTree.KDPoint;
 import rampancy.util.data.kdTree.KDTree;
 import rampancy.util.wave.RBulletWave;
+import robocode.util.Utils;
 
+// This is only suited for 1v1 battles!
 public class RDynamicClusteringGun extends RGun {
 
 	public static final String NAME = "Dynamic clustering gun";
 	public static final int BUCKET_SIZE = 9;
+	public static final int MAX_TREE_SIZE = 1000;
+	public static final double GAUSSIAN_COEFFICIENT = 1.0 / Math.sqrt(2 * Math.PI);
 	
-	protected HashMap<String, KDTree<DCGunPoint>> kdTrees;
+	protected KDTree<DCGunPoint> tree;
 	
 	public RDynamicClusteringGun() {
 		super(NAME);
-		kdTrees = new HashMap<String, KDTree<DCGunPoint>>();
+		tree = new KDTree<DCGunPoint>(BUCKET_SIZE);
 	}
 	
 	public void update(RampantRobot reference, RBulletWave wave) {
-		REnemyRobot enemy = wave.getFiringSolution().target;
 		double factor1 = wave.getGuessFactorForLargest();
 		double factor2 = wave.getGuessFactorForSmallest();
 		double max = Math.max(factor1, factor2);
 		double min = Math.min(factor1, factor2);
-		DCGunPoint value = new DCGunPoint(new double[]{min, max});
+		DCGunPoint value = new DCGunPoint(min, max);
 		KDPoint<DCGunPoint> observation = new KDPoint<DCGunPoint>(value, getCoordinateForEnemyState(wave.getInitialState()));
-		getTreeForEnemy(enemy).add(observation);
+		tree.add(observation);
+	}
+	
+	public void updateEndOfRound(RampantRobot reference) {
+		int pointsToKeep = Math.min(MAX_TREE_SIZE, tree.size());
+		reference.out.println("Rebalancing kd tree with " + pointsToKeep + " of " + tree.size() + " points");
+		tree.rebalance(MAX_TREE_SIZE);
 	}
 
 	@Override
 	public RFiringSolution getFiringSolution(RampantRobot reference, REnemyRobot enemy) {
-		KDTree<DCGunPoint> tree = getTreeForEnemy(enemy);
 		KDPoint<DCGunPoint> query = new KDPoint<DCGunPoint>(null, getCoordinateForEnemyState(enemy.getCurrentState()));
 		ArrayList<KDPoint<DCGunPoint>> neighbors = tree.kNearestNeighbors(query, 15);
-	
-		double angle = enemy.getCurrentState().absoluteBearing;
-		return new Solution(this, enemy, 1.95, angle);
-	}
-	
-	protected KDTree<DCGunPoint> getTreeForEnemy(REnemyRobot enemy) {
-		if (!kdTrees.containsKey(enemy.getName())) {
-			kdTrees.put(enemy.getName(), new KDTree<DCGunPoint>(BUCKET_SIZE));
+		if (neighbors.isEmpty()) {
+			return new Solution(this, enemy, 1.95, enemy.getCurrentState().absoluteBearing);
 		}
-		return kdTrees.get(enemy.getName());
+		
+		double mu = 0;
+		double minGuessFactor = Double.POSITIVE_INFINITY;
+		double maxGuessFactor = Double.NEGATIVE_INFINITY;
+		for (KDPoint<DCGunPoint> neighbor : neighbors) {
+			if (neighbor.value.min < minGuessFactor) {
+				minGuessFactor = neighbor.value.min;
+			}
+			
+			if (neighbor.value.max > maxGuessFactor) {
+				maxGuessFactor = neighbor.value.max;
+			}
+			
+			mu += neighbor.value.sum;
+		}
+	
+		double sigma = 0;
+		for (KDPoint<DCGunPoint> neighbor : neighbors) {
+			sigma += neighbor.value.deviationSum(mu);
+		}
+		sigma = Math.sqrt(1.0 / neighbors.size() * sigma);
+		double bandwidth = (1.06 * sigma) * Math.pow(neighbors.size(), -1.0/5.0);
+	
+		double bestDensity = Double.NEGATIVE_INFINITY;
+		double bestFactor = 0;
+		for (double factor = minGuessFactor; factor <= maxGuessFactor; factor += 0.01) {
+			double density = 0;
+			for (KDPoint<DCGunPoint> neighbor : neighbors) {
+				density += neighbor.value.kernel(factor, bandwidth);
+			}
+			if (density > bestDensity) {
+				bestDensity = density;
+				bestFactor = factor;
+			}
+		}
+
+		double bulletPower = 1.95;
+		double bulletVelocity = RUtil.computeBulletVelocity(bulletPower);
+		double offset = RUtil.computeMaxEscapeAngle(bulletVelocity) * bestFactor * enemy.getCurrentState().directionTraveling;
+		double angle = Utils.normalAbsoluteAngle(enemy.getCurrentState().absoluteBearing + offset);
+		return new Solution(this, enemy, 1.95, angle);
 	}
 	
 	protected double[] getCoordinateForEnemyState(RRobotState state) {
@@ -63,10 +105,32 @@ public class RDynamicClusteringGun extends RGun {
 	}
 	
 	class DCGunPoint {
-		double[] guessFactors;
+		public double min;
+		public double max;
+		public double mid; 
+		public double sum;
 		
-		public DCGunPoint(double[] guessFactors) {
-			this.guessFactors = guessFactors;
+		public DCGunPoint(double min, double max) {
+			this.min = min;
+			this.max = max;
+			this.mid = (max - min) / 2.0;
+			this.sum = this.max + this.min + this.mid;
+		}
+		
+		public double deviationSum(double mu) {
+			return Math.pow(mid - mu, 2) + Math.pow(min - mu, 2) + Math.pow(max - mu, 2);
+		}
+		
+		public double kernel(double testPoint, double bandwidth) {
+			if (testPoint >= min && testPoint <= max) {
+				return GAUSSIAN_COEFFICIENT;
+			}
+			double comparisonPoint = min;
+			if (testPoint > max) {
+				comparisonPoint = max;
+			}
+			double diff = (testPoint - comparisonPoint) / bandwidth;
+			return GAUSSIAN_COEFFICIENT * Math.exp(-0.5 * diff * diff);
 		}
 	}
 	

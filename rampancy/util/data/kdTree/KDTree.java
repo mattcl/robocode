@@ -27,6 +27,10 @@ public class KDTree<T> {
 		}
 		this.root.add(value);
 	}
+	
+	public int size() {
+		return this.dataPoints.size();
+	}
 
 	public void rebalance() {
 		this.root = null;

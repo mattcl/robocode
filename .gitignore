@@ -1,3 +1,5 @@
 *.class
 .classpath
 .settings/org.eclipse.jdt.core.prefs
+*.swp
+*.swo

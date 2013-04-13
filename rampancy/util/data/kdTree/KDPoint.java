@@ -3,8 +3,8 @@ package rampancy.util.data.kdTree;
 import java.util.Arrays;
 
 public class KDPoint<T> {
-	T value;
-	double[] features;
+	public T value;
+	public double[] features;
 	
 	public KDPoint(T value, double[] features) {
 		this.value = value;

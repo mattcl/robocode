@@ -36,6 +36,12 @@ public class RGunManager {
 		}
 	}
 	
+	public void updateEndOfRound(RampantRobot reference) {
+		for (RGun gun : guns) {
+			gun.updateEndOfRound(reference);
+		}
+	}
+	
 	public String toString() {
 		String str = "Gun stats:\n";
 		str += "************\n";

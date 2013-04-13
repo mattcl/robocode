@@ -34,5 +34,9 @@ public abstract class RGun {
 		// do nothing
 	}
 	
+	public void updateEndOfRound(RampantRobot reference) {
+		// do nothing
+	}
+	
 	abstract public RFiringSolution getFiringSolution(RampantRobot reference, REnemyRobot enemy);
 }
