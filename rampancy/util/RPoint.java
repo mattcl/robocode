@@ -6,6 +6,10 @@ import robocode.util.Utils;
 
 @SuppressWarnings("serial")
 public class RPoint extends Point2D.Double {
+    
+    public RPoint() {
+        this(0, 0);
+    }
 	
 	public RPoint(double x, double y) {
 		super(x, y);

@@ -1,7 +1,6 @@
 package rampancy.util.external;
 
-import java.awt.geom.Point2D;
-
+import rampancy.util.RPoint;
 import robocode.Rules;
 import robocode.util.Utils;
 
@@ -9,45 +8,53 @@ import robocode.util.Utils;
  * A simulator class I wrote to make simulation simple.
  * 
  * @author Chase
+ *
+ * ZLIB License: This software is provided 'as-is', without any express or
+ * implied warranty. In no event will the authors be held liable for any damages
+ * arising from the use of this software.
+ * 
+ * Permission is granted to anyone to use this software for any purpose,
+ * including commercial applications, and to alter it and redistribute it
+ * freely, subject to the following restrictions:
+ * 
+ * 1. The origin of this software must not be misrepresented; you must not claim
+ * that you wrote the original software. If you use this software in a product,
+ * an acknowledgment in the product documentation would be appreciated but is
+ * not required.
+ * 
+ * 2. Altered source versions must be plainly marked as such, and must not be
+ * misrepresented as being the original software.
+ * 
+ * 3. This notice may not be removed or altered from any source distribution.
  */
-
-/*
-ZLIB License:
-This software is provided 'as-is', without any express or implied
-warranty. In no event will the authors be held liable for any damages
-arising from the use of this software.
-
-Permission is granted to anyone to use this software for any purpose,
-including commercial applications, and to alter it and redistribute it
-freely, subject to the following restrictions:
-
-   1. The origin of this software must not be misrepresented; you must not
-   claim that you wrote the original software. If you use this software
-   in a product, an acknowledgment in the product documentation would be
-   appreciated but is not required.
-
-   2. Altered source versions must be plainly marked as such, and must not be
-   misrepresented as being the original software.
-
-   3. This notice may not be removed or altered from any source
-   distribution.
-*/
-public final class MovSim2 {
-    public Point2D.Double position;
-    public double         heading;
-    public double         velocity;
-    public double         headingDelta;
-    public double         maxVelocity;
-    public double         angleToTurn;
-    public int            direction;
+public final class MovSim2 { // Change name from Simulate to MovSim2 to avoid conflicts
+    public RPoint position; // Replace Point2D.Double with my RPoint
+    public double heading;
+    public double velocity;
+    public double headingDelta;
+    public double maxVelocity;
+    public double angleToTurn;
+    public int    direction;
 
     /**
      * Create a new Simulate class
      */
     public MovSim2() {
-        position = new Point2D.Double();
+        position = new RPoint();
         maxVelocity = Rules.MAX_VELOCITY;
         direction = 1;
+    }
+   
+    /**
+     * Add easier to use constructor
+     */
+    public MovSim2(RPoint position, double heading, double velocity, double angleToTurn, int direction) {
+        this.position = position.getCopy();
+        this.heading = heading;
+        this.velocity = velocity;
+        this.angleToTurn = angleToTurn;
+        this.direction = direction;
+        this.maxVelocity = Rules.MAX_VELOCITY;
     }
 
     /**

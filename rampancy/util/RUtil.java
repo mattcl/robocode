@@ -4,7 +4,9 @@
 package rampancy.util;
 
 import java.awt.Graphics2D;
+import java.util.ArrayList;
 
+import rampancy.util.external.MovSim2;
 import robocode.AdvancedRobot;
 import robocode.util.Utils;
 
@@ -42,12 +44,28 @@ public abstract class RUtil {
     }
     
     /**
-     * Determines the max escape angle given velocity
+     * Determines the max escape angle given bullet velocity
      * @param velocity
      * @return the max escape angle
      */
     public static double computeMaxEscapeAngle(double velocity) {
         return Math.asin(8.0 / velocity);
+    }
+    
+    public static double computePreciseMaxEscapeAngle() {
+        return 0; 
+    }
+    
+    public static ArrayList<RPoint> simulateMovement(RRobotState shooterState, RRobotState targetState, double orbitAngle, double bulletVelocity, int direction) {
+        ArrayList<RPoint> locations = new ArrayList<RPoint>();
+        long time = 0;
+        MovSim2 sim = new MovSim2(targetState.location, targetState.heading, targetState.velocity, orbitAngle, direction);
+        do {
+            locations.add(sim.position.getCopy());
+            sim.step();
+            time++; 
+        } while (bulletVelocity * time < shooterState.location.distance(sim.position));
+        return locations; 
     }
     
     /**
@@ -63,8 +81,7 @@ public abstract class RUtil {
         return goAngle;
     }*/
     
-    public static double computeOrbitAngle(RBattlefield battlefield, RPoint location, REnemyRobot enemy, double attackAngle, int direction) {
-        RRobotState state = enemy.getCurrentState();
+    public static double computeOrbitAngle(RBattlefield battlefield, RPoint location, RRobotState state, double attackAngle, int direction) {
         double goAngle = RUtil.computeAbsoluteBearing(state.location, location);
         return RUtil.wallSmoothing(battlefield, state.location, goAngle + (Math.PI / 2.0 + attackAngle) * direction, direction, state.distance);
     }
