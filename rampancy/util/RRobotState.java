@@ -23,7 +23,7 @@ public class RRobotState {
     public double energy;
     public double gunHeat;
     public boolean accelerating;
-    public boolean breaking;
+    public boolean braking;
     public int directionTraveling;
     
     public RRobotState() {}
@@ -43,7 +43,7 @@ public class RRobotState {
         this.advancingVelocity        = 0;
         this.deltaV                   = lastState == null ? 0 : velocity - lastState.velocity;
         this.accelerating             = deltaV > 0;
-        this.breaking                 = !accelerating;
+        this.braking                 = !accelerating;
         this.deltaH                   = lastState == null ? 0 : heading - lastState.heading;
         this.distance                 = 0;
         this.distanceFromWall         = RUtil.getDistanceFromWall(battlefield, location);
@@ -75,7 +75,7 @@ public class RRobotState {
             this.advancingVelocity        = velocity * -1 * Math.cos(heading - absoluteBearing);
             this.deltaV                   = lastState == null ? 0 : velocity - lastState.velocity;
             this.accelerating             = deltaV > 0;
-            this.breaking                 = !accelerating;
+            this.braking                 = !accelerating;
             this.deltaH                   = lastState == null ? 0 : heading - lastState.heading;
             this.distance                 = e.getDistance();
             this.distanceFromWall         = RUtil.getDistanceFromWall(battlefield, location);
@@ -112,7 +112,7 @@ public class RRobotState {
         this.energy                   = energy;
         this.directionTraveling       = directionTraveling;
         this.accelerating             = deltaV > 0;
-        this.breaking                 = deltaV < 0;
+        this.braking                 = deltaV < 0;
     }
     
     public RRobotState(RRobotState state) {
@@ -148,7 +148,7 @@ public class RRobotState {
         result = prime * result + (accelerating ? 1231 : 1237);
         temp = Double.doubleToLongBits(advancingVelocity);
         result = prime * result + (int) (temp ^ (temp >>> 32));
-        result = prime * result + (breaking ? 1231 : 1237);
+        result = prime * result + (braking ? 1231 : 1237);
         temp = Double.doubleToLongBits(deltaH);
         result = prime * result + (int) (temp ^ (temp >>> 32));
         temp = Double.doubleToLongBits(deltaV);
@@ -197,7 +197,7 @@ public class RRobotState {
         if (Double.doubleToLongBits(advancingVelocity) != Double
                 .doubleToLongBits(other.advancingVelocity))
             return false;
-        if (breaking != other.breaking)
+        if (braking != other.braking)
             return false;
         if (Double.doubleToLongBits(deltaH) != Double
                 .doubleToLongBits(other.deltaH))

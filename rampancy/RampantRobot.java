@@ -10,10 +10,9 @@ import rampancy.util.REnemyManager;
 import rampancy.util.REnemyRobot;
 import rampancy.util.RPoint;
 import rampancy.util.RRobotState;
-import rampancy.util.gun.RCircularTargetingGun;
+import rampancy.util.gun.RDisabledGun;
 import rampancy.util.gun.RDynamicClusteringGun;
 import rampancy.util.gun.RFiringSolution;
-import rampancy.util.gun.RGun;
 import rampancy.util.gun.RGunManager;
 import rampancy.util.wave.RBulletWave;
 import rampancy.util.wave.RWaveManager;
@@ -67,7 +66,8 @@ public abstract class RampantRobot extends AdvancedRobot {
 
         if (gunManager == null) {
         	gunManager = new RGunManager();
-        	gunManager.add(new RCircularTargetingGun());
+        	//gunManager.add(new RCircularTargetingGun());
+        	gunManager.add(new RDisabledGun());
         	gunManager.add(new RDynamicClusteringGun());
         }
 

@@ -1,7 +1,6 @@
 package rampancy.util.gun;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import rampancy.RampantRobot;
 import rampancy.util.REnemyRobot;
@@ -71,7 +70,7 @@ public class RDynamicClusteringGun extends RGun {
 			sigma += neighbor.value.deviationSum(mu);
 		}
 		sigma = Math.sqrt(1.0 / neighbors.size() * sigma);
-		double bandwidth = (1.06 * sigma) * Math.pow(neighbors.size(), -1.0/5.0);
+		double bandwidth = (1.06 * sigma) * Math.pow(neighbors.size() * 3, -1.0/5.0);
 	
 		double bestDensity = Double.NEGATIVE_INFINITY;
 		double bestFactor = 0;
@@ -80,6 +79,7 @@ public class RDynamicClusteringGun extends RGun {
 			for (KDPoint<DCGunPoint> neighbor : neighbors) {
 				density += neighbor.value.kernel(factor, bandwidth);
 			}
+			density = (1.0 / (bandwidth * neighbors.size() * 3)) * density;
 			if (density > bestDensity) {
 				bestDensity = density;
 				bestFactor = factor;
@@ -123,7 +123,8 @@ public class RDynamicClusteringGun extends RGun {
 		
 		public double kernel(double testPoint, double bandwidth) {
 			if (testPoint >= min && testPoint <= max) {
-				return GAUSSIAN_COEFFICIENT;
+				double diff = (testPoint - mid) / bandwidth;
+				return GAUSSIAN_COEFFICIENT * Math.exp(-0.5 * diff * diff) + GAUSSIAN_COEFFICIENT;
 			}
 			double comparisonPoint = min;
 			if (testPoint > max) {
