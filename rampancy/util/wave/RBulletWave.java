@@ -27,8 +27,8 @@ public class RBulletWave extends RWave {
 	protected RPoint smallestIntersection;
 	protected RPoint largestIntersection;
 	protected double absoluteFiringAngle;
-	protected double maxEscapeAngleForward;
-	protected double maxEscapeAngleBackward;
+	protected double escapeAngleClockwise;
+	protected double escapeAngleCounterClockwise;
 	protected RMovementPath path1;
 	protected RMovementPath path2;
 	protected boolean didHit;
@@ -50,14 +50,8 @@ public class RBulletWave extends RWave {
 		this.firingSolution.gun.noteShotFired();
 		path1 = new RMovementPath();
 		path2 = new RMovementPath();
-		double escapeAngle1 = RUtil.computePreciseMaxEscapeAngle(RampantRobot.getGlobalBattlefield(), creatorState, initialState, velocity, 1, path1);
-		double escapeAngle2 = RUtil.computePreciseMaxEscapeAngle(RampantRobot.getGlobalBattlefield(), creatorState, initialState, velocity, -1, path2);
-		this.maxEscapeAngleForward = escapeAngle1;
-		this.maxEscapeAngleBackward = escapeAngle2;
-		if (initialState.directionTraveling < 0) {
-			this.maxEscapeAngleForward = escapeAngle2;
-			this.maxEscapeAngleBackward = escapeAngle1;
-		}
+		this.escapeAngleClockwise = RUtil.computePreciseMaxEscapeAngle(RampantRobot.getGlobalBattlefield(), creatorState, initialState, velocity, 1 * initialState.directionTraveling, path1);
+		this.escapeAngleCounterClockwise = RUtil.computePreciseMaxEscapeAngle(RampantRobot.getGlobalBattlefield(), creatorState, initialState, velocity, -1 * initialState.directionTraveling, path2);
 	}
 	
 	public RFiringSolution getFiringSolution() {
@@ -78,9 +72,9 @@ public class RBulletWave extends RWave {
 	
 	protected double getGuessFactor(double desiredAbsB) {
 		double angleOffset = Utils.normalRelativeAngle(desiredAbsB - initialState.absoluteBearing);
-		double escapeAngle = maxEscapeAngleForward;
+		double escapeAngle = escapeAngleClockwise;
 		if (initialState.directionTraveling < 0) {
-			escapeAngle = maxEscapeAngleBackward;
+			escapeAngle = escapeAngleCounterClockwise;
 		}
 		if (angleOffset > escapeAngle) {
 			escapeAngle = RUtil.computeMaxEscapeAngle(velocity);
@@ -137,13 +131,12 @@ public class RBulletWave extends RWave {
 				RPoint midpoint = origin.projectTo(largestAbsB, distanceTraveled / 2);
 				g.drawString("" + RUtil.roundToPrecision(getGuessFactorForLargest(), 2), (int) midpoint.x, (int) midpoint.y);
 			}
+			int direction = initialState.directionTraveling;
 			g.setColor(Color.red);
-			RUtil.drawLine(origin, origin.projectTo(maxEscapeAngleForward + initialState.absoluteBearing, distanceTraveled), g);
+			RUtil.drawLine(origin, origin.projectTo(escapeAngleClockwise * direction + initialState.absoluteBearing, distanceTraveled), g);
 			g.setColor(Color.yellow);
-			RUtil.drawLine(origin, origin.projectTo(maxEscapeAngleBackward + initialState.absoluteBearing, distanceTraveled), g);
+			RUtil.drawLine(origin, origin.projectTo(-escapeAngleCounterClockwise *direction + initialState.absoluteBearing, distanceTraveled), g);
 			firingSolution.draw(g);
-			path1.draw(g);
-			path2.draw(g);
 		}
 		g.setColor(WAVE_COLOR);
 		RUtil.drawOval(bulletLocation, 5, g);

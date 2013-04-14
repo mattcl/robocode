@@ -8,10 +8,16 @@ public abstract class RGun {
 
 	protected String name;
 	protected RGunStat stat;
+	protected boolean displayStats;
 	
 	public RGun(String name) {
 		this.name = name;
 		this.stat = new RGunStat();
+		this.displayStats = true;
+	}
+	
+	public boolean displayStats() {
+	    return displayStats;
 	}
 
 	public String toString() {

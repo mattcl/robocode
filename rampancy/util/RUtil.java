@@ -6,7 +6,6 @@ package rampancy.util;
 import java.awt.Graphics2D;
 import java.util.ArrayList;
 
-import rampancy.util.external.MovSim2;
 import rampancy.util.external.MovementPredictor;
 import robocode.AdvancedRobot;
 import robocode.util.Utils;
@@ -66,31 +65,10 @@ public abstract class RUtil {
     		return 0;
     	}
     	double finalLocationAbsB = shooterState.location.computeAbsoluteBearingTo(path.get(path.size() - 1));
-    	return Utils.normalRelativeAngle(finalLocationAbsB - targetState.absoluteBearing);
+    	double escapeAngle = Utils.normalRelativeAngle(finalLocationAbsB - targetState.absoluteBearing);
+    	return Math.abs(escapeAngle);
     }
    
-    /*
-    public static ArrayList<RPoint> simulateMovement(RBattlefield battlefield, RRobotState shooterState, RRobotState targetState, double bulletVelocity, int movDir) {
-        ArrayList<RPoint> locations = new ArrayList<RPoint>();
-        long time = 0;
-        MovSim2 sim = new MovSim2(targetState.location, targetState.heading, targetState.velocity);
-        do {
-    		double latVelocity = sim.velocity * Math.sin(sim.heading - shooterState.location.computeAbsoluteBearingTo(sim.position));
-	        int direction = RUtil.nonZeroSign(latVelocity);
-	    	double orbitAngle = computeOrbitAngle(battlefield, shooterState.location, sim.position, 0.0, direction);
-	        double angleToTurn = Utils.normalRelativeAngle(orbitAngle - sim.heading);
-	        if (angleToTurn > Math.PI / 2.0) {
-	        	angleToTurn = Utils.normalRelativeAngle(angleToTurn - Math.PI);
-	        	direction = -direction;
-	        }
-        	sim.angleToTurn = angleToTurn;
-        	sim.direction = direction * movDir;
-            sim.step();
-            locations.add(sim.position.getCopy());
-            time++; 
-        } while (bulletVelocity * time < shooterState.location.distance(sim.position));
-        return locations; 
-    }*/
     public static ArrayList<RPoint> simulateMovement(RBattlefield battlefield, RRobotState shooterState, RRobotState targetState, double bulletVelocity, int movDir) {
         ArrayList<RPoint> locations = new ArrayList<RPoint>();
     	MovementPredictor.PredictionStatus status = new MovementPredictor.PredictionStatus(targetState.location.x, targetState.location.y, targetState.heading, targetState.velocity, 0);

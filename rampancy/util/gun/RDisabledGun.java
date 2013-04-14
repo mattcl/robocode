@@ -9,6 +9,9 @@ public class RDisabledGun extends RGun {
 
 	public RDisabledGun() {
 		super(NAME);
+		// I don't care about the stats for this gun, since it is only used to
+		// attack disabled robots
+		this.displayStats = false;
 	}
 
 	@Override
@@ -23,5 +26,4 @@ public class RDisabledGun extends RGun {
 	public double getHitPercentage() {
 		return 100;
 	}
-
 }

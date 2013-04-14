@@ -1,7 +1,6 @@
 package rampancy;
 
 import java.awt.Graphics2D;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -60,6 +59,7 @@ public abstract class RampantRobot extends AdvancedRobot {
         setAdjustGunForRobotTurn(true);
         setAdjustRadarForGunTurn(true);
         setAdjustRadarForRobotTurn(true);
+        initialSetup();
 
         globalBattlefield = new RBattlefield((int) getBattleFieldWidth(), (int) getBattleFieldHeight());
 
@@ -70,18 +70,20 @@ public abstract class RampantRobot extends AdvancedRobot {
         if (gunManager == null) {
         	gunManager = new RGunManager();
         	gunManager.add(new RDisabledGun());
-//        	gunManager.add(new RCircularTargetingGun());
+        	gunManager.add(new RCircularTargetingGun());
         	gunManager.add(new RDynamicClusteringGun());
         }
 
         waveManager = new RWaveManager();
-
+        
         setTurnRadarRightRadians(Double.POSITIVE_INFINITY);
         location = new RPoint(getX(), getY());
         while (true) {
             scan();
         }
     }
+    
+    abstract public void initialSetup();
 
     public void onScannedRobot(ScannedRobotEvent e) {
         stateHistory.push(new RRobotState(this, globalBattlefield, e));

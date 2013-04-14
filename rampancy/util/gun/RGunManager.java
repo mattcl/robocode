@@ -46,7 +46,9 @@ public class RGunManager {
 		String str = "Gun stats:\n";
 		str += "************\n";
 		for (RGun gun : guns) {
-			str += gun.toString() + "\n";
+		    if (gun.displayStats()) {
+    			str += gun.toString() + "\n";
+		    }
 		}
 		return str;
 	}

@@ -159,7 +159,8 @@ public class REnemyRobot {
         }
         
         g.setColor(Color.white);
-        g.draw(new RRectangle(state.location));
+        RPoint location = state.location;
+        g.draw(new RRectangle(location));
     }
 
     // ---------- Private ---------- //

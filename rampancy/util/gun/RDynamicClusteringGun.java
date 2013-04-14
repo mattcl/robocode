@@ -1,12 +1,10 @@
 package rampancy.util.gun;
 
-import java.awt.Color;
 import java.awt.Graphics2D;
 import java.util.ArrayList;
 
 import rampancy.RampantRobot;
 import rampancy.util.REnemyRobot;
-import rampancy.util.RMovementPath;
 import rampancy.util.RRobotState;
 import rampancy.util.RUtil;
 import rampancy.util.data.kdTree.KDPoint;
@@ -51,7 +49,7 @@ public class RDynamicClusteringGun extends RGun {
 		KDPoint<DCGunPoint> query = new KDPoint<DCGunPoint>(null, getCoordinateForEnemyState(enemy.getCurrentState()));
 		ArrayList<KDPoint<DCGunPoint>> neighbors = tree.kNearestNeighbors(query, NUM_NEIGHBORS);
 		if (neighbors.isEmpty()) {
-			return new Solution(this, enemy, 1.95, enemy.getCurrentState().absoluteBearing, null, null);
+			return new Solution(this, enemy, 1.95, enemy.getCurrentState().absoluteBearing, 0);
 		}
 		
 		double mu = 0;
@@ -90,19 +88,18 @@ public class RDynamicClusteringGun extends RGun {
 			}
 		}
 
+		RRobotState state = enemy.getCurrentState();
 		double bulletPower = 1.95;
 		double bulletVelocity = RUtil.computeBulletVelocity(bulletPower);
-		RMovementPath path1 = new RMovementPath(Color.green);
-		RMovementPath path2 = new RMovementPath();
-		double escapeAngleForward = RUtil.computePreciseMaxEscapeAngle(RampantRobot.getGlobalBattlefield(), reference.getCurrentState(), enemy.getCurrentState(), bulletVelocity, 1, path1);
-		double escapeAngleBackward = RUtil.computePreciseMaxEscapeAngle(RampantRobot.getGlobalBattlefield(), reference.getCurrentState(), enemy.getCurrentState(), bulletVelocity, -1, path2);
+		double escapeAngleClockwise = RUtil.computePreciseMaxEscapeAngle(RampantRobot.getGlobalBattlefield(), reference.getCurrentState(), state, bulletVelocity, 1 * state.directionTraveling);
+		double escapeAngleCounterClockwise = RUtil.computePreciseMaxEscapeAngle(RampantRobot.getGlobalBattlefield(), reference.getCurrentState(), state, bulletVelocity, -1 * state.directionTraveling);
 		
-		double offset = escapeAngleForward * bestFactor * enemy.getCurrentState().directionTraveling;
+		double offset = escapeAngleClockwise * bestFactor * state.directionTraveling;
 		if (bestFactor < 0) {
-			offset = -escapeAngleBackward * bestFactor * enemy.getCurrentState().directionTraveling;
+			offset = escapeAngleCounterClockwise * bestFactor * state.directionTraveling;
 		}
 		double angle = Utils.normalAbsoluteAngle(enemy.getCurrentState().absoluteBearing + offset);
-		return new Solution(this, enemy, 1.95, angle, path1, path2);
+		return new Solution(this, enemy, 1.95, angle, bestFactor);
 	}
 	
 	protected double[] getCoordinateForEnemyState(RRobotState state) {
@@ -148,23 +145,16 @@ public class RDynamicClusteringGun extends RGun {
 	}
 	
 	class Solution extends RFiringSolution {
-		RMovementPath path1;
-		RMovementPath path2;
+	    double maxAngleForward;
+	    double maxAngleBackward;
+	    double guessFactor;
 
-		public Solution(RGun gun, REnemyRobot target, double power, double firingAngle, RMovementPath path1, RMovementPath path2) {
+		public Solution(RGun gun, REnemyRobot target, double power, double firingAngle, double guessFactor) {
 			super(gun, target, power, firingAngle);
-			this.path1 = path1;
-			this.path2 = path2;
+			this.guessFactor = guessFactor;
 		}
 		
 		public void draw(Graphics2D g) {
-			/*
-			if (path1 != null) {
-				path1.draw(g);
-			}
-			if (path2 != null) {
-				path2.draw(g);
-			}*/
 		}
 	}
 
