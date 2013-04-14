@@ -112,7 +112,7 @@ public class RRobotState {
         this.energy                   = energy;
         this.directionTraveling       = directionTraveling;
         this.accelerating             = deltaV > 0;
-        this.braking                 = deltaV < 0;
+        this.braking                  = deltaV < 0;
     }
     
     public RRobotState(RRobotState state) {

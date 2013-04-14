@@ -18,5 +18,10 @@ public class RDisabledGun extends RGun {
 		}
 		return null;
 	}
+	
+	@Override
+	public double getHitPercentage() {
+		return 100;
+	}
 
 }

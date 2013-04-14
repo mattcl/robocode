@@ -15,19 +15,23 @@ public abstract class RGun {
 	}
 
 	public String toString() {
-		return name + " real " + stat.getRealHitPercentage() + "%, virtual " + stat.getVirtualHitPercentage() + "%";
+		return name + " score " + stat.getHitPercentage() + "%";
 	}
 	
 	public String summary() {
 		return toString();
 	}
 	
-	public void noteShotFired(boolean isVirtual) {
-		stat.noteShotFired(isVirtual);
+	public void noteShotFired() {
+		stat.noteShotFired();
 	}
 	
-	public void noteShotHit(boolean isVirtual) {
-		stat.noteShotHit(isVirtual);
+	public void noteShotHit() {
+		stat.noteShotHit();
+	}
+	
+	public double getHitPercentage() {
+		return stat.getHitPercentage();
 	}
 	
 	public void update(RampantRobot reference, RBulletWave wave) {

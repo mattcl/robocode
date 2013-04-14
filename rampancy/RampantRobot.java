@@ -1,6 +1,7 @@
 package rampancy;
 
 import java.awt.Graphics2D;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -10,6 +11,7 @@ import rampancy.util.REnemyManager;
 import rampancy.util.REnemyRobot;
 import rampancy.util.RPoint;
 import rampancy.util.RRobotState;
+import rampancy.util.gun.RCircularTargetingGun;
 import rampancy.util.gun.RDisabledGun;
 import rampancy.util.gun.RDynamicClusteringGun;
 import rampancy.util.gun.RFiringSolution;
@@ -43,7 +45,8 @@ public abstract class RampantRobot extends AdvancedRobot {
     protected LinkedList<RRobotState> stateHistory;
     private boolean processingShot;
     private long fireTime;
-    private RFiringSolution lockedSolution;
+    private int lockedSolutionIndex;
+    private List<RFiringSolution> lockedSolutions;
     private REnemyRobot lockedEnemy;
 
     public RampantRobot() {
@@ -66,8 +69,8 @@ public abstract class RampantRobot extends AdvancedRobot {
 
         if (gunManager == null) {
         	gunManager = new RGunManager();
-        	//gunManager.add(new RCircularTargetingGun());
         	gunManager.add(new RDisabledGun());
+//        	gunManager.add(new RCircularTargetingGun());
         	gunManager.add(new RDynamicClusteringGun());
         }
 
@@ -94,7 +97,7 @@ public abstract class RampantRobot extends AdvancedRobot {
 
         List<RFiringSolution> firingSolutions = gunManager.getFiringSolutions(this, enemy);
         if (!firingSolutions.isEmpty()) {
-            lockFiringSolution(enemy, firingSolutions.get(0));
+            lockFiringSolutions(enemy, firingSolutions);
         } else if (!processingShot) {
             setTurnGunRightRadians(enemy.getCurrentState().absoluteBearing - getGunHeadingRadians());
         }
@@ -157,20 +160,29 @@ public abstract class RampantRobot extends AdvancedRobot {
         }
 
         if(fireTime <= getTime() && getGunTurnRemainingRadians() == 0) {
-            if(setFireBullet(lockedSolution.power) != null) {
-                RBulletWave wave = new RBulletWave(this, lockedSolution, this.getTime(), null);
-                waveManager.add(wave);
+            if(setFireBullet(lockedSolutions.get(lockedSolutionIndex).power) != null) {
+            	for (int i = 0; i < lockedSolutions.size(); i++) {
+	                RBulletWave wave = new RBulletWave(this, lockedSolutions.get(i), this.getTime(), null, i != lockedSolutionIndex);
+	                waveManager.add(wave);
+            	}
             }
             return true;
         }
         return false;
     }
 
-    protected boolean lockFiringSolution(REnemyRobot enemy, RFiringSolution firingSolution) {
+    protected boolean lockFiringSolutions(REnemyRobot enemy, List<RFiringSolution> firingSolutions) {
         if(!processingShot) {
             lockedEnemy = enemy;
-            lockedSolution = firingSolution;
-            setTurnGunRightRadians(Utils.normalRelativeAngle(lockedSolution.firingAngle - getGunHeadingRadians()));
+            lockedSolutions = firingSolutions;
+            int bestIndex = 0;
+            for (int i = 1; i < firingSolutions.size(); i++) {
+            	if (firingSolutions.get(i).gun.getHitPercentage() > firingSolutions.get(bestIndex).gun.getHitPercentage()) {
+            		bestIndex = i;
+            	}
+            }
+            lockedSolutionIndex = bestIndex;
+            setTurnGunRightRadians(Utils.normalRelativeAngle(lockedSolutions.get(lockedSolutionIndex).firingAngle - getGunHeadingRadians()));
             fireTime = getTime() + 1;
             processingShot = true;
             return true;

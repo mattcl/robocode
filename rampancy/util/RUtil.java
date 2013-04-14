@@ -7,6 +7,7 @@ import java.awt.Graphics2D;
 import java.util.ArrayList;
 
 import rampancy.util.external.MovSim2;
+import rampancy.util.external.MovementPredictor;
 import robocode.AdvancedRobot;
 import robocode.util.Utils;
 
@@ -52,20 +53,55 @@ public abstract class RUtil {
         return Math.asin(8.0 / velocity);
     }
     
-    public static double computePreciseMaxEscapeAngle() {
-        return 0; 
+    public static double computePreciseMaxEscapeAngle(RBattlefield battlefield, RRobotState shooterState, RRobotState targetState, double bulletVelocity, int direction) {
+    	return computePreciseMaxEscapeAngle(battlefield, shooterState, targetState, bulletVelocity, direction, null);
     }
     
-    public static ArrayList<RPoint> simulateMovement(RRobotState shooterState, RRobotState targetState, double orbitAngle, double bulletVelocity, int direction) {
+    public static double computePreciseMaxEscapeAngle(RBattlefield battlefield, RRobotState shooterState, RRobotState targetState, double bulletVelocity, int direction, RMovementPath movementPath) {
+    	ArrayList<RPoint> path = simulateMovement(battlefield, shooterState, targetState, bulletVelocity, direction);
+    	if (movementPath != null) {
+	    	movementPath.setPath(path);
+    	}
+    	if (path.isEmpty()) {
+    		return 0;
+    	}
+    	double finalLocationAbsB = shooterState.location.computeAbsoluteBearingTo(path.get(path.size() - 1));
+    	return Utils.normalRelativeAngle(finalLocationAbsB - targetState.absoluteBearing);
+    }
+   
+    /*
+    public static ArrayList<RPoint> simulateMovement(RBattlefield battlefield, RRobotState shooterState, RRobotState targetState, double bulletVelocity, int movDir) {
         ArrayList<RPoint> locations = new ArrayList<RPoint>();
         long time = 0;
-        MovSim2 sim = new MovSim2(targetState.location, targetState.heading, targetState.velocity, orbitAngle, direction);
+        MovSim2 sim = new MovSim2(targetState.location, targetState.heading, targetState.velocity);
         do {
-            locations.add(sim.position.getCopy());
+    		double latVelocity = sim.velocity * Math.sin(sim.heading - shooterState.location.computeAbsoluteBearingTo(sim.position));
+	        int direction = RUtil.nonZeroSign(latVelocity);
+	    	double orbitAngle = computeOrbitAngle(battlefield, shooterState.location, sim.position, 0.0, direction);
+	        double angleToTurn = Utils.normalRelativeAngle(orbitAngle - sim.heading);
+	        if (angleToTurn > Math.PI / 2.0) {
+	        	angleToTurn = Utils.normalRelativeAngle(angleToTurn - Math.PI);
+	        	direction = -direction;
+	        }
+        	sim.angleToTurn = angleToTurn;
+        	sim.direction = direction * movDir;
             sim.step();
+            locations.add(sim.position.getCopy());
             time++; 
         } while (bulletVelocity * time < shooterState.location.distance(sim.position));
         return locations; 
+    }*/
+    public static ArrayList<RPoint> simulateMovement(RBattlefield battlefield, RRobotState shooterState, RRobotState targetState, double bulletVelocity, int movDir) {
+        ArrayList<RPoint> locations = new ArrayList<RPoint>();
+    	MovementPredictor.PredictionStatus status = new MovementPredictor.PredictionStatus(targetState.location.x, targetState.location.y, targetState.heading, targetState.velocity, 0);
+    	long time = 0;
+    	do {
+	    	double orbitAngle = computeOrbitAngle(battlefield, shooterState.location, status, 0.0, movDir);
+    		status = MovementPredictor.predict(status, orbitAngle);
+    		locations.add(status);
+    		time++;
+    	} while (bulletVelocity * time < status.distance(shooterState.location));
+    	return locations;
     }
     
     /**
@@ -81,9 +117,9 @@ public abstract class RUtil {
         return goAngle;
     }*/
     
-    public static double computeOrbitAngle(RBattlefield battlefield, RPoint location, RRobotState state, double attackAngle, int direction) {
-        double goAngle = RUtil.computeAbsoluteBearing(state.location, location);
-        return RUtil.wallSmoothing(battlefield, state.location, goAngle + (Math.PI / 2.0 + attackAngle) * direction, direction, state.distance);
+    public static double computeOrbitAngle(RBattlefield battlefield, RPoint center, RPoint location, double attackAngle, int direction) {
+        double goAngle = RUtil.computeAbsoluteBearing(center, location);
+        return RUtil.wallSmoothing(battlefield, location, goAngle + (Math.PI / 2.0 + attackAngle) * direction, direction, location.distance(center));
     }
     
     public static void drawLine(RPoint p1, RPoint p2, Graphics2D g) {

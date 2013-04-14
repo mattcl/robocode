@@ -48,12 +48,10 @@ public final class MovSim2 { // Change name from Simulate to MovSim2 to avoid co
     /**
      * Add easier to use constructor
      */
-    public MovSim2(RPoint position, double heading, double velocity, double angleToTurn, int direction) {
+    public MovSim2(RPoint position, double heading, double velocity) {
         this.position = position.getCopy();
         this.heading = heading;
         this.velocity = velocity;
-        this.angleToTurn = angleToTurn;
-        this.direction = direction;
         this.maxVelocity = Rules.MAX_VELOCITY;
     }
 
@@ -63,6 +61,10 @@ public final class MovSim2 { // Change name from Simulate to MovSim2 to avoid co
     public void setLocation(double x, double y) {
         position.x = x;
         position.y = y;
+    }
+    
+    public void setLocation(RPoint location) {
+    	this.position = location.getCopy();
     }
 
     /**

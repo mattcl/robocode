@@ -29,7 +29,9 @@ public class RWaveManager implements RDrawable {
 			RBulletWave wave = bulletWaves.get(i);
 			wave.update(time);
 			if (wave.didBreak()) {
-				RampantRobot.getGunManager().updateGuns(reference, wave);
+				if (!wave.isVirtual()) {
+					RampantRobot.getGunManager().updateGuns(reference, wave);
+				}
 				bulletWaves.remove(i);
 			}
 		}
