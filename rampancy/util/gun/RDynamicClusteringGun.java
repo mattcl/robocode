@@ -49,7 +49,7 @@ public class RDynamicClusteringGun extends RGun {
 		KDPoint<DCGunPoint> query = new KDPoint<DCGunPoint>(null, getCoordinateForEnemyState(enemy.getCurrentState()));
 		ArrayList<KDPoint<DCGunPoint>> neighbors = tree.kNearestNeighbors(query, NUM_NEIGHBORS);
 		if (neighbors.isEmpty()) {
-			return new Solution(this, enemy, 1.95, enemy.getCurrentState().absoluteBearing, 0);
+			return new Solution(this, enemy, 1.95, enemy.getCurrentState().absoluteBearing);
 		}
 		
 		double mu = 0;
@@ -71,9 +71,9 @@ public class RDynamicClusteringGun extends RGun {
 		for (KDPoint<DCGunPoint> neighbor : neighbors) {
 			sigma += neighbor.value.deviationSum(mu);
 		}
-		sigma = Math.sqrt(1.0 / neighbors.size() * sigma);
+		sigma = Math.sqrt(1.0 / (neighbors.size() * 3) * sigma);
 		double bandwidth = (1.06 * sigma) * Math.pow(neighbors.size() * 3, -1.0/5.0);
-	
+
 		double bestDensity = Double.NEGATIVE_INFINITY;
 		double bestFactor = 0;
 		for (double factor = minGuessFactor; factor <= maxGuessFactor; factor += 0.01) {
@@ -99,7 +99,7 @@ public class RDynamicClusteringGun extends RGun {
 			offset = escapeAngleCounterClockwise * bestFactor * state.directionTraveling;
 		}
 		double angle = Utils.normalAbsoluteAngle(enemy.getCurrentState().absoluteBearing + offset);
-		return new Solution(this, enemy, 1.95, angle, bestFactor);
+		return new Solution(this, enemy, 1.95, angle);
 	}
 	
 	protected double[] getCoordinateForEnemyState(RRobotState state) {
@@ -147,11 +147,9 @@ public class RDynamicClusteringGun extends RGun {
 	class Solution extends RFiringSolution {
 	    double maxAngleForward;
 	    double maxAngleBackward;
-	    double guessFactor;
 
-		public Solution(RGun gun, REnemyRobot target, double power, double firingAngle, double guessFactor) {
+		public Solution(RGun gun, REnemyRobot target, double power, double firingAngle) {
 			super(gun, target, power, firingAngle);
-			this.guessFactor = guessFactor;
 		}
 		
 		public void draw(Graphics2D g) {

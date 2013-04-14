@@ -7,6 +7,7 @@ import java.awt.Graphics2D;
 import java.util.ArrayList;
 
 import rampancy.util.external.MovementPredictor;
+import rampancy.util.movement.RMovementPath;
 import robocode.AdvancedRobot;
 import robocode.util.Utils;
 

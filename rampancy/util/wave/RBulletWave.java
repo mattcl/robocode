@@ -6,11 +6,11 @@ import java.util.List;
 
 import rampancy.RampantRobot;
 import rampancy.util.REnemyRobot;
-import rampancy.util.RMovementPath;
 import rampancy.util.RPoint;
 import rampancy.util.RRobotState;
 import rampancy.util.RUtil;
 import rampancy.util.gun.RFiringSolution;
+import rampancy.util.movement.RMovementPath;
 import robocode.util.Utils;
 
 public class RBulletWave extends RWave {
