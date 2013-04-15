@@ -14,6 +14,7 @@ import robocode.util.Utils;
 public abstract class RUtil {
     
     public static final double WALL_STICK = 150;
+	public static final double GAUSSIAN_COEFFICIENT = 1.0 / Math.sqrt(2 * Math.PI);
     
     public static double computeRequiredBulletPower(RPoint source, RPoint target, int time) {
         double distance = source.distance(target);

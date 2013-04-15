@@ -19,10 +19,8 @@ public class RDynamicClusteringGun extends RGun {
 	public static final int BUCKET_SIZE = 9;
 	public static final int MAX_TREE_SIZE = 1000;
 	public static final int NUM_NEIGHBORS = 9;
-	public static final double GAUSSIAN_COEFFICIENT = 1.0 / Math.sqrt(2 * Math.PI);
 	
-	protected KDTree<DCGunPoint> tree;
-	
+	protected KDTree<DCGunPoint> tree; 
 	public RDynamicClusteringGun() {
 		super(NAME);
 		tree = new KDTree<DCGunPoint>(BUCKET_SIZE);
@@ -133,14 +131,14 @@ public class RDynamicClusteringGun extends RGun {
 		public double kernel(double testPoint, double bandwidth) {
 			if (testPoint >= min && testPoint <= max) {
 				double diff = (testPoint - mid) / bandwidth;
-				return GAUSSIAN_COEFFICIENT * Math.exp(-0.5 * diff * diff) + GAUSSIAN_COEFFICIENT;
+				return RUtil.GAUSSIAN_COEFFICIENT * Math.exp(-0.5 * diff * diff) + RUtil.GAUSSIAN_COEFFICIENT;
 			}
 			double comparisonPoint = min;
 			if (testPoint > max) {
 				comparisonPoint = max;
 			}
 			double diff = (testPoint - comparisonPoint) / bandwidth;
-			return GAUSSIAN_COEFFICIENT * Math.exp(-0.5 * diff * diff);
+			return RUtil.GAUSSIAN_COEFFICIENT * Math.exp(-0.5 * diff * diff);
 		}
 	}
 	
