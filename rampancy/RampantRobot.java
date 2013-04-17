@@ -9,8 +9,8 @@ import rampancy.util.RBattlefield;
 import rampancy.util.REnemyManager;
 import rampancy.util.REnemyRobot;
 import rampancy.util.RPoint;
+import rampancy.util.RRobot;
 import rampancy.util.RRobotState;
-import rampancy.util.gun.RCircularTargetingGun;
 import rampancy.util.gun.RDisabledGun;
 import rampancy.util.gun.RDynamicClusteringGun;
 import rampancy.util.gun.RFiringSolution;
@@ -27,7 +27,7 @@ import robocode.ScannedRobotEvent;
 import robocode.SkippedTurnEvent;
 import robocode.util.Utils;
 
-public abstract class RampantRobot extends AdvancedRobot {
+public abstract class RampantRobot extends AdvancedRobot implements RRobot {
 
     public static RBattlefield globalBattlefield;
     public static REnemyManager enemyManager;

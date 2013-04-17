@@ -34,13 +34,17 @@ public class RDCSurfingManager implements RMovementManager {
 		//		a. we may need to flatten our current movement profile,
 		//         perhaps we select a more dangerous location with the intent
 		//         of distributing our movement profile
-		// 5. return the movement choice
+	    // 5. If possible, select our orbit angle path to maintain our desired
+	    //    distance. Possibly move in for the attack if the opponent has a
+	    //    low enough hit percentage
+		// 6. return the movement choice
 		
 		/*
 		 * How to prevent us from moving back and forth? Maybe don't surf more
 		 * than one wave at a time? Don't move into the danger zone of another
 		 * wave? 
 		 */
+	    
 		return null;
 	}
 	

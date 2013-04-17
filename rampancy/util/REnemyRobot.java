@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import rampancy.RampantRobot;
 import robocode.ScannedRobotEvent;
 
-public class REnemyRobot {
+public class REnemyRobot implements RRobot {
     public static final int MAX_HISTORY_SIZE = 1500;
     public static final int BOT_RADIUS = 18;
     

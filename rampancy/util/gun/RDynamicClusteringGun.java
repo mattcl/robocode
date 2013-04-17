@@ -32,7 +32,7 @@ public class RDynamicClusteringGun extends RGun {
 		double max = Math.max(factor1, factor2);
 		double min = Math.min(factor1, factor2);
 		DCGunPoint value = new DCGunPoint(min, max);
-		KDPoint<DCGunPoint> observation = new KDPoint<DCGunPoint>(value, getCoordinateForEnemyState(wave.getInitialState()));
+		KDPoint<DCGunPoint> observation = new KDPoint<DCGunPoint>(value, getCoordinateForEnemyState(wave.getInitialTargetState()));
 		tree.add(observation);
 	}
 	
