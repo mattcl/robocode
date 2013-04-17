@@ -15,7 +15,7 @@ public class RBattlefield {
     public static final double AGAINST_WALL_TOLERANCE = 150;
     public static final double NEAR_WALL_TOLERANCE    = AGAINST_WALL_TOLERANCE + 150;
     
-    public static final int INNER_DISTANCE = 18;
+    public static final int INNER_DISTANCE = 19;
     
     public Rectangle bfRect;
     public Rectangle innerRect;

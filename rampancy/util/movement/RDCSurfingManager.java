@@ -1,6 +1,7 @@
 package rampancy.util.movement;
 
 import rampancy.RampantRobot;
+import rampancy.util.RPoint;
 import rampancy.util.RUtil;
 import rampancy.util.data.kdTree.KDTree;
 
@@ -21,12 +22,29 @@ public class RDCSurfingManager implements RMovementManager {
 	@Override
 	public void updateEndOfRound(RampantRobot reference) {
 		// TODO Auto-generated method stub
-		
 	}
 	
 	@Override
 	public RMovementChoice getMovementChoice(RampantRobot reference) {
 		// TODO Auto-generated method stub
+		// 1. Determine the wave that poses the greatest danger to us right now
+		// 2. Compute our current max escape angle in each direction for that wave
+		// 3. Determine the safest guess factors (make sure to take into account the bot width
+		// 4. Select the best guess factor to move to, given the current situation
+		//		a. we may need to flatten our current movement profile,
+		//         perhaps we select a more dangerous location with the intent
+		//         of distributing our movement profile
+		// 5. return the movement choice
+		
+		/*
+		 * How to prevent us from moving back and forth? Maybe don't surf more
+		 * than one wave at a time? Don't move into the danger zone of another
+		 * wave? 
+		 */
+		return null;
+	}
+	
+	protected RPoint getOrbitLocation() {
 		return null;
 	}
 	

@@ -398,7 +398,7 @@ public abstract class RUtil {
         double wallStick = Math.min(distanceToCenterOfOrbit, WALL_STICK);
         
         RPoint projectedLocation = project(location, goAngle, wallStick);
-        if(bf.contains(projectedLocation)) 
+        if(bf.validMovePosition(projectedLocation)) 
             return goAngle; // no change needed
         
         double topDist    = bf.innerDistanceFromTop(location);

@@ -15,6 +15,8 @@ import rampancy.util.gun.RDisabledGun;
 import rampancy.util.gun.RDynamicClusteringGun;
 import rampancy.util.gun.RFiringSolution;
 import rampancy.util.gun.RGunManager;
+import rampancy.util.movement.RDCSurfingManager;
+import rampancy.util.movement.RMovementManager;
 import rampancy.util.wave.RBulletWave;
 import rampancy.util.wave.RWaveManager;
 import robocode.AdvancedRobot;
@@ -30,6 +32,7 @@ public abstract class RampantRobot extends AdvancedRobot {
     public static RBattlefield globalBattlefield;
     public static REnemyManager enemyManager;
     public static RWaveManager waveManager;
+    public static RMovementManager movementManager;
     public static RGunManager gunManager;
 
     public static RBattlefield getGlobalBattlefield() {
@@ -66,14 +69,18 @@ public abstract class RampantRobot extends AdvancedRobot {
         if (enemyManager == null) {
             enemyManager = new REnemyManager();
         }
+        
+        if (movementManager == null) {
+        	movementManager = new RDCSurfingManager();
+        }
 
         if (gunManager == null) {
         	gunManager = new RGunManager();
         	gunManager.add(new RDisabledGun());
-        	gunManager.add(new RCircularTargetingGun());
+        	//gunManager.add(new RCircularTargetingGun());
         	gunManager.add(new RDynamicClusteringGun());
         }
-
+        
         waveManager = new RWaveManager();
         
         setTurnRadarRightRadians(Double.POSITIVE_INFINITY);
