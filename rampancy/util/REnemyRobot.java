@@ -99,6 +99,10 @@ public class REnemyRobot implements RRobot {
         return null;
     }
     
+    public RRobotState getTargetableState() {
+    	return getCurrentState();
+    }
+    
     public RRobotState getLastState() {
         if(states.size() > 1) {
             return states.get(1);

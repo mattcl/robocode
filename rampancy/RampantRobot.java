@@ -14,10 +14,13 @@ import rampancy.util.RRobotState;
 import rampancy.util.gun.RDisabledGun;
 import rampancy.util.gun.RDynamicClusteringGun;
 import rampancy.util.gun.RFiringSolution;
+import rampancy.util.gun.RGun;
 import rampancy.util.gun.RGunManager;
 import rampancy.util.movement.RDCSurfingManager;
+import rampancy.util.movement.RMovementChoice;
 import rampancy.util.movement.RMovementManager;
 import rampancy.util.wave.RBulletWave;
+import rampancy.util.wave.REnemyWave;
 import rampancy.util.wave.RWaveManager;
 import robocode.AdvancedRobot;
 import robocode.Bullet;
@@ -56,6 +59,8 @@ public abstract class RampantRobot extends AdvancedRobot implements RRobot {
         stateHistory = new LinkedList<RRobotState>();
         location = null;
     }
+    
+    abstract protected void initGunManager(RGunManager gunManager);
 
     public void run() {
         super.run();
@@ -77,8 +82,7 @@ public abstract class RampantRobot extends AdvancedRobot implements RRobot {
         if (gunManager == null) {
         	gunManager = new RGunManager();
         	gunManager.add(new RDisabledGun());
-        	//gunManager.add(new RCircularTargetingGun());
-        	gunManager.add(new RDynamicClusteringGun());
+        	initGunManager(gunManager);
         }
         
         waveManager = new RWaveManager();
@@ -101,8 +105,14 @@ public abstract class RampantRobot extends AdvancedRobot implements RRobot {
         }
         REnemyRobot enemy = enemyManager.get(name);
         enemy.update(this, globalBattlefield, e);
-
+        if (enemy.shotFired()) {
+        	waveManager.add(new REnemyWave(enemy, this, getTime() - 1));
+        }
         waveManager.update(this);
+        
+        // determine movement here
+        REnemyWave surfableWave = waveManager.getMostDangerousWave(this);
+        RMovementChoice movementChoice = movementManager.getMovementChoice(this, surfableWave);
 
         List<RFiringSolution> firingSolutions = gunManager.getFiringSolutions(this, enemy);
         if (!firingSolutions.isEmpty()) {
@@ -157,6 +167,20 @@ public abstract class RampantRobot extends AdvancedRobot implements RRobot {
             return null;
         }
         return stateHistory.get(0);
+    }
+    
+    public RRobotState getLastState() {
+    	if (stateHistory.size() < 2) {
+    		return getCurrentState();
+    	}
+    	return stateHistory.get(1);
+    }
+    
+    public RRobotState getTargetableState() {
+    	if (stateHistory.size() < 3) {
+    		return getLastState();
+    	}
+    	return stateHistory.get(2);
     }
 
 	public RPoint getLocation() {

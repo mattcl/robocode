@@ -18,7 +18,7 @@ public class RDynamicClusteringGun extends RGun {
 	public static final String NAME = "Dynamic clustering gun";
 	public static final int BUCKET_SIZE = 9;
 	public static final int MAX_TREE_SIZE = 1000;
-	public static final int NUM_NEIGHBORS = 9;
+	public static final int NUM_NEIGHBORS = 11;
 	
 	protected KDTree<DCGunPoint> tree; 
 	public RDynamicClusteringGun() {
@@ -31,7 +31,7 @@ public class RDynamicClusteringGun extends RGun {
 		double factor2 = wave.getGuessFactorForSmallest();
 		double max = Math.max(factor1, factor2);
 		double min = Math.min(factor1, factor2);
-		DCGunPoint value = new DCGunPoint(min, max);
+		DCGunPoint value = new DCGunPoint(min, max, reference.getTime());
 		KDPoint<DCGunPoint> observation = new KDPoint<DCGunPoint>(value, getCoordinateForEnemyState(wave.getInitialTargetState()));
 		tree.add(observation);
 	}
@@ -44,6 +44,7 @@ public class RDynamicClusteringGun extends RGun {
 
 	@Override
 	public RFiringSolution getFiringSolution(RampantRobot reference, REnemyRobot enemy) {
+		long time = reference.getTime();
 		KDPoint<DCGunPoint> query = new KDPoint<DCGunPoint>(null, getCoordinateForEnemyState(enemy.getCurrentState()));
 		ArrayList<KDPoint<DCGunPoint>> neighbors = tree.kNearestNeighbors(query, NUM_NEIGHBORS);
 		if (neighbors.isEmpty()) {
@@ -77,7 +78,7 @@ public class RDynamicClusteringGun extends RGun {
 		for (double factor = minGuessFactor; factor <= maxGuessFactor; factor += 0.01) {
 			double density = 0;
 			for (KDPoint<DCGunPoint> neighbor : neighbors) {
-				density += neighbor.value.kernel(factor, bandwidth);
+				density += neighbor.value.kernel(factor, bandwidth, time);
 			}
 			density = (1.0 / (bandwidth * neighbors.size() * 3)) * density;
 			if (density > bestDensity) {
@@ -88,6 +89,9 @@ public class RDynamicClusteringGun extends RGun {
 
 		RRobotState state = enemy.getCurrentState();
 		double bulletPower = 1.95;
+		if (this.stat.shotsFired > 50 && this.getHitPercentage() < 20) {
+			bulletPower = 1.2;
+		}
 		double bulletVelocity = RUtil.computeBulletVelocity(bulletPower);
 		double escapeAngleClockwise = RUtil.computePreciseMaxEscapeAngle(RampantRobot.getGlobalBattlefield(), reference.getCurrentState(), state, bulletVelocity, 1 * state.directionTraveling);
 		double escapeAngleCounterClockwise = RUtil.computePreciseMaxEscapeAngle(RampantRobot.getGlobalBattlefield(), reference.getCurrentState(), state, bulletVelocity, -1 * state.directionTraveling);
@@ -97,7 +101,7 @@ public class RDynamicClusteringGun extends RGun {
 			offset = escapeAngleCounterClockwise * bestFactor * state.directionTraveling;
 		}
 		double angle = Utils.normalAbsoluteAngle(enemy.getCurrentState().absoluteBearing + offset);
-		return new Solution(this, enemy, 1.95, angle);
+		return new Solution(this, enemy, bulletPower, angle);
 	}
 	
 	protected double[] getCoordinateForEnemyState(RRobotState state) {
@@ -106,39 +110,42 @@ public class RDynamicClusteringGun extends RGun {
 				RUtil.normalize(state.advancingVelocity),
 				RUtil.normalize(state.distance),
 				RUtil.normalize(state.timeSinceDirectionChange),
-				RUtil.normalize(state.timeSinceVelocityChange)
+				RUtil.normalize(state.timeSinceVelocityChange),
 			};
 		return query;
 	}
 	
 	class DCGunPoint {
+		public long recordedTime;
 		public double min;
 		public double max;
 		public double mid; 
 		public double sum;
 		
-		public DCGunPoint(double min, double max) {
+		public DCGunPoint(double min, double max, long recordedTime) {
 			this.min = min;
 			this.max = max;
 			this.mid = (max - min) / 2.0;
 			this.sum = this.max + this.min + this.mid;
+			this.recordedTime = recordedTime;
 		}
 		
 		public double deviationSum(double mu) {
 			return Math.pow(mid - mu, 2) + Math.pow(min - mu, 2) + Math.pow(max - mu, 2);
 		}
 		
-		public double kernel(double testPoint, double bandwidth) {
+		public double kernel(double testPoint, double bandwidth, long currentTime) {
+			double timeFactor = 1.0 / (1 + 0.5 * (currentTime - recordedTime));
 			if (testPoint >= min && testPoint <= max) {
 				double diff = (testPoint - mid) / bandwidth;
-				return RUtil.GAUSSIAN_COEFFICIENT * Math.exp(-0.5 * diff * diff) + RUtil.GAUSSIAN_COEFFICIENT;
+				return timeFactor * (RUtil.GAUSSIAN_COEFFICIENT * Math.exp(-0.5 * diff * diff) + RUtil.GAUSSIAN_COEFFICIENT);
 			}
 			double comparisonPoint = min;
 			if (testPoint > max) {
 				comparisonPoint = max;
 			}
 			double diff = (testPoint - comparisonPoint) / bandwidth;
-			return RUtil.GAUSSIAN_COEFFICIENT * Math.exp(-0.5 * diff * diff);
+			return timeFactor * 0.7 * RUtil.GAUSSIAN_COEFFICIENT * Math.exp(-0.5 * diff * diff);
 		}
 	}
 	

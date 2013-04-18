@@ -4,6 +4,7 @@ import rampancy.RampantRobot;
 import rampancy.util.RPoint;
 import rampancy.util.RUtil;
 import rampancy.util.data.kdTree.KDTree;
+import rampancy.util.wave.REnemyWave;
 
 public class RDCSurfingManager implements RMovementManager {
 	public static final int BUCKET_SIZE = 10;
@@ -45,6 +46,12 @@ public class RDCSurfingManager implements RMovementManager {
 		 * wave? 
 		 */
 	    
+		return null;
+	}
+
+	@Override
+	public RMovementChoice getMovementChoice(RampantRobot reference, REnemyWave wave) {
+		// TODO Auto-generated method stub
 		return null;
 	}
 	

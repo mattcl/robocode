@@ -47,7 +47,7 @@ abstract public class RWave implements RDrawable {
 		this.initialCreatorState = creator.getCurrentState().getCopy();
 		this.origin = initialCreatorState.location.getCopy();
 		this.target = target;
-		this.initialTargetState = target.getCurrentState().getCopy();
+		this.initialTargetState = target.getTargetableState().getCopy();
 		this.startTime = startTime;
 		this.power = power;
 		this.velocity = RUtil.computeBulletVelocity(power);

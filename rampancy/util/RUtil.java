@@ -424,7 +424,6 @@ public abstract class RUtil {
         
         if(smoothTop) {
             newAngle = (topDist < tolerance ? Math.PI / 2 : Math.acos(topDist / wallStick)) * direction;
-            
         } else if(smoothBot) {
             newAngle = (botDist < tolerance ? Math.PI / 2 : Math.acos(botDist / wallStick)) * direction + Math.PI;
         } else if(smoothRight) {
@@ -433,7 +432,7 @@ public abstract class RUtil {
             newAngle = (leftDist < tolerance ? Math.PI / 2 : Math.acos(leftDist / wallStick)) * direction + 3 * Math.PI / 2;
         } else {
             System.err.println("Smoothing Error!");
-            return 0;
+            return goAngle;
         }
         return newAngle;
     }
