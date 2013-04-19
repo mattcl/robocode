@@ -11,10 +11,9 @@ import rampancy.util.REnemyRobot;
 import rampancy.util.RPoint;
 import rampancy.util.RRobot;
 import rampancy.util.RRobotState;
+import rampancy.util.RUtil;
 import rampancy.util.gun.RDisabledGun;
-import rampancy.util.gun.RDynamicClusteringGun;
 import rampancy.util.gun.RFiringSolution;
-import rampancy.util.gun.RGun;
 import rampancy.util.gun.RGunManager;
 import rampancy.util.movement.RDCSurfingManager;
 import rampancy.util.movement.RMovementChoice;
@@ -25,6 +24,7 @@ import rampancy.util.wave.RWaveManager;
 import robocode.AdvancedRobot;
 import robocode.Bullet;
 import robocode.BulletHitEvent;
+import robocode.HitByBulletEvent;
 import robocode.RoundEndedEvent;
 import robocode.ScannedRobotEvent;
 import robocode.SkippedTurnEvent;
@@ -111,9 +111,13 @@ public abstract class RampantRobot extends AdvancedRobot implements RRobot {
         waveManager.update(this);
         
         // determine movement here
+        
         REnemyWave surfableWave = waveManager.getMostDangerousWave(this);
         if (surfableWave != null) {
 	        RMovementChoice movementChoice = movementManager.getMovementChoice(this, surfableWave);
+	        if (movementChoice != null) {
+	            RUtil.setBackAsFront(this, movementChoice.goAngle, movementChoice.distance);
+	        }
         }
 
         List<RFiringSolution> firingSolutions = gunManager.getFiringSolutions(this, enemy);
@@ -134,6 +138,14 @@ public abstract class RampantRobot extends AdvancedRobot implements RRobot {
 		if(enemy == null) {
 			return;
 		}
+    }
+    
+    public void onHitByBullet(HitByBulletEvent e) {
+       Bullet bullet = e.getBullet();
+       REnemyWave wave = waveManager.getWaveForBullet(bullet);
+       if (wave != null) {
+           movementManager.update(this, wave);
+       }
     }
 
     public void onRoundEnded(RoundEndedEvent e) {
@@ -186,7 +198,7 @@ public abstract class RampantRobot extends AdvancedRobot implements RRobot {
     }
 
 	public RPoint getLocation() {
-        return location;
+        return getCurrentState().location;
     }
 
     protected boolean attemptShot() {

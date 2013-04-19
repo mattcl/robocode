@@ -59,6 +59,7 @@ abstract public class RWave implements RDrawable {
 		this.escapeAngleCounterClockwise = RUtil.computePreciseMaxEscapeAngle(RampantRobot.getGlobalBattlefield(), initialCreatorState, initialTargetState, velocity, -1 * initialTargetState.directionTraveling, path2);
 		this.largestAbsB = Double.NEGATIVE_INFINITY;
 		this.smallestAbsB = Double.POSITIVE_INFINITY;
+		this.color = color;
 	}
 	
 	public boolean didBreak() {
@@ -130,6 +131,18 @@ abstract public class RWave implements RDrawable {
 		return distanceTraveled;
 	}
 	
+	public double getGuessFactor(double desiredAbsB) {
+		double angleOffset = Utils.normalRelativeAngle(desiredAbsB - initialTargetState.absoluteBearing);
+		double escapeAngle = escapeAngleClockwise;
+		if (initialTargetState.directionTraveling < 0) {
+			escapeAngle = escapeAngleCounterClockwise;
+		}
+		if (angleOffset > escapeAngle) {
+			escapeAngle = RUtil.computeMaxEscapeAngle(velocity);
+		}
+		return Math.max(-1, Math.min(1, angleOffset / Math.abs(escapeAngle))) * initialTargetState.directionTraveling;
+	}
+	
 	public double getGuessFactorForLargest() {
 		return getGuessFactor(largestAbsB);
 	}
@@ -145,7 +158,7 @@ abstract public class RWave implements RDrawable {
 	public RRobotState getInitialTargetState() {
 		return initialTargetState;
 	}
-	
+
 	public RPoint getOrigin() {
 		return origin;
 	}
@@ -175,12 +188,12 @@ abstract public class RWave implements RDrawable {
 	public boolean isVirtual() {
 		return isVirtual;
 	}
-
+	
 	public long timeToImpact(RPoint point) {
 		double remainingDistance = distanceTo(point) - getDistanceTraveled();
 		return (long) (remainingDistance / getVelocity());
 	}
-	
+
 	public void update(long time) {
 		distanceTraveled = (time - startTime) * getVelocity();
 		List<RPoint> intersections = computeIntersections(target.getCurrentState().location);
@@ -199,7 +212,7 @@ abstract public class RWave implements RDrawable {
 			}
 		}
 	}
-
+	
 	protected List<RPoint> computeIntersections(RPoint botLocation) {
 		ArrayList<RPoint> intersections = new ArrayList<RPoint>();
 		double innerRadius = distanceTraveled - velocity;
@@ -245,7 +258,7 @@ abstract public class RWave implements RDrawable {
 			intersections.add(new RPoint(x, candidate));
 		}
 	}
-	
+
 	protected void evaluateYCandidates(double y, double leftX, double rightX, double innerRadius, double outerRadius, List<RPoint> intersections) {
 		double diff = Math.abs(y - origin.y);
 		if (diff > outerRadius) {
@@ -272,17 +285,5 @@ abstract public class RWave implements RDrawable {
 		if (candidate <= rightX && candidate >= leftX) {
 			intersections.add(new RPoint(candidate, y));
 		}
-	}
-
-	protected double getGuessFactor(double desiredAbsB) {
-		double angleOffset = Utils.normalRelativeAngle(desiredAbsB - initialTargetState.absoluteBearing);
-		double escapeAngle = escapeAngleClockwise;
-		if (initialTargetState.directionTraveling < 0) {
-			escapeAngle = escapeAngleCounterClockwise;
-		}
-		if (angleOffset > escapeAngle) {
-			escapeAngle = RUtil.computeMaxEscapeAngle(velocity);
-		}
-		return Math.max(-1, Math.min(1, angleOffset / Math.abs(escapeAngle))) * initialTargetState.directionTraveling;
 	}
 }

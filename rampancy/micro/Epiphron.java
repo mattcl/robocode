@@ -74,7 +74,7 @@ public class Epiphron extends AdvancedRobot {
                 }
             }
             double angle = Utils.normalRelativeAngle(Utils.normalAbsoluteAngle(Math.atan2(targetX - x, targetY - y)) - getGunHeadingRadians());
-            setTurnGunRightRadians(angle + Math.PI);
+            setTurnGunRightRadians(angle);
             if(power >= 0.1) {
                 setFire(power);
             }

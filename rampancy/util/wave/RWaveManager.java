@@ -5,6 +5,8 @@ import java.util.ArrayList;
 
 import rampancy.RampantRobot;
 import rampancy.util.RDrawable;
+import rampancy.util.RPoint;
+import robocode.Bullet;
 
 public class RWaveManager implements RDrawable {
 	protected ArrayList<REnemyWave> enemyWaves;
@@ -60,6 +62,22 @@ public class RWaveManager implements RDrawable {
 			}
 		}
 		return bestWave;
+	}
+	
+	public REnemyWave getWaveForBullet(Bullet bullet) {
+	    RPoint hitLocation = new RPoint(bullet.getX(), bullet.getY());
+	    double bestDistance = Double.POSITIVE_INFINITY;
+	    REnemyWave bestWave = null;
+	    for (REnemyWave wave : enemyWaves) {
+	        double travelDist = wave.distanceTo(hitLocation);
+	        double velocity = wave.getVelocity();
+	        double dist = Math.abs(travelDist - wave.getDistanceTraveled()) + Math.abs(velocity - bullet.getVelocity());
+	        if (dist < bestDistance) {
+	            bestDistance = dist;
+	            bestWave = wave;
+	        }
+	    }
+	    return bestWave;
 	}
 
 	@Override
