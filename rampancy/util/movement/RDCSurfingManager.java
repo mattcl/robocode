@@ -27,7 +27,11 @@ public class RDCSurfingManager implements RMovementManager {
 	
 	@Override
 	public RMovementChoice getMovementChoice(RampantRobot reference) {
-		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public RMovementChoice getMovementChoice(RampantRobot reference, REnemyWave wave) {
 		// 1. Determine the wave that poses the greatest danger to us right now
 		// 2. Compute our current max escape angle in each direction for that wave
 		// 3. Determine the safest guess factors (make sure to take into account the bot width
@@ -45,13 +49,8 @@ public class RDCSurfingManager implements RMovementManager {
 		 * than one wave at a time? Don't move into the danger zone of another
 		 * wave? 
 		 */
-	    
-		return null;
-	}
-
-	@Override
-	public RMovementChoice getMovementChoice(RampantRobot reference, REnemyWave wave) {
-		// TODO Auto-generated method stub
+	    double orbitAngleClockwise = RUtil.computeOrbitAngle(RampantRobot.getGlobalBattlefield(), wave.getOrigin(), reference.getCurrentState().location, 0, 1);
+	    double orbitAngleCounterClockwise = RUtil.computeOrbitAngle(RampantRobot.getGlobalBattlefield(), wave.getOrigin(), reference.getCurrentState().location, 0, -1);
 		return null;
 	}
 	
@@ -60,17 +59,19 @@ public class RDCSurfingManager implements RMovementManager {
 	}
 	
 	class DCSurfingPoint {
+	    public long recordedTime;
 		public double guessFactor;
 		
-		public DCSurfingPoint(double guessFactor) {
+		public DCSurfingPoint(double guessFactor, long recordedTime) {
 			this.guessFactor = guessFactor;
+			this.recordedTime = recordedTime;
 		}
 		
 		public double deviationSum(double mu) {
 			return Math.pow(guessFactor - mu, 2);
 		}
 		
-		public double kernel(double testPoint, double bandwidth) {
+		public double kernel(double testPoint, double bandwidth, long currentTime) {
 			double diff = (testPoint - guessFactor) / bandwidth;
 			return RUtil.GAUSSIAN_COEFFICIENT * Math.exp(-0.5 * diff * diff);
 		}
