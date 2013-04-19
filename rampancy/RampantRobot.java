@@ -112,7 +112,9 @@ public abstract class RampantRobot extends AdvancedRobot implements RRobot {
         
         // determine movement here
         REnemyWave surfableWave = waveManager.getMostDangerousWave(this);
-        RMovementChoice movementChoice = movementManager.getMovementChoice(this, surfableWave);
+        if (surfableWave != null) {
+	        RMovementChoice movementChoice = movementManager.getMovementChoice(this, surfableWave);
+        }
 
         List<RFiringSolution> firingSolutions = gunManager.getFiringSolutions(this, enemy);
         if (!firingSolutions.isEmpty()) {
