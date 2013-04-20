@@ -2,20 +2,22 @@ package htf;
 
 import robocode.HitRobotEvent;
 import robocode.HitWallEvent;
+import robocode.Robot;
 import robocode.util.Utils;
 
 /*
  * This robot does no attacking. It just moves back and forth from EAST to WEST
  */
-public class BackAndForth extends HTFRobot {
+public class BackAndForth extends Robot {
 
 	// Variables defined here are called "instance variables." They can be
 	// "seen" by any method in this file
 	double direction;
 	
 	public void run() {
-		super.run();
-	
+		setAdjustGunForRobotTurn(true);
+		setAdjustRadarForGunTurn(true);
+		setAdjustRadarForRobotTurn(true);
 		// since we want this robot to move back and forth, we need some way
 		// to change the direction we're moving in. 
 		direction = 1;

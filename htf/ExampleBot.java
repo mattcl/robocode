@@ -7,18 +7,21 @@ import java.awt.Color;
 
 import robocode.HitByBulletEvent;
 import robocode.HitWallEvent;
+import robocode.Robot;
 import robocode.ScannedRobotEvent;
 import robocode.util.Utils;
 
-public class ExampleBot extends HTFRobot {
+public class ExampleBot extends Robot {
 
 	public void run() {
 		// When we call super, we are calling the run() method of the parent
 		// class. In this case, super.run() sets up some basic things that you
 		// shouldn't need to worry about for your robot. If you're curious, you
 		// can look at the code for HTFRobot
-		super.run();
-		
+		setAdjustGunForRobotTurn(true);
+		setAdjustRadarForGunTurn(true);
+		setAdjustRadarForRobotTurn(true);
+		setColors();
 		// This is the main "loop." everything in the loop will be run over and
 		// over again. Here, we are just moving in a "circle"
 		while (true) {
