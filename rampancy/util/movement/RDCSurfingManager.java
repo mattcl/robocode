@@ -78,20 +78,19 @@ public class RDCSurfingManager implements RMovementManager {
 		    return null; // TODO: other movement
 		}
 		
-		reference.out.println(neighbors.size());
 		// determine the absB for this guess factor
         double mu = 0;
 		for (KDPoint<DCSurfingPoint> neighbor : neighbors) {
 			mu += neighbor.value.guessFactor;
 		}
-		reference.out.println(mu);
 	
 		double sigma = 0;
 		for (KDPoint<DCSurfingPoint> neighbor : neighbors) {
 			sigma += neighbor.value.deviationSum(mu);
 		}
-		sigma = Math.sqrt(1.0 / neighbors.size() * sigma);
+		sigma = Math.sqrt(sigma / neighbors.size());
 		double bandwidth = (1.06 * sigma) * Math.pow(neighbors.size(), -1.0/5.0);
+		reference.out.println(bandwidth);
 		double bestDensity = Double.POSITIVE_INFINITY;
 		double desiredGuessFactor = 0;
 		ArrayList<RPoint> densities = new ArrayList<RPoint>();
@@ -116,7 +115,6 @@ public class RDCSurfingManager implements RMovementManager {
 		}
 		
 		wave.setDangerMap(densities);
-		reference.out.println(densities.toString());
 	
 		double currentAbsBFromOrigin = wave.getOrigin().computeAbsoluteBearingTo(reference.getCurrentState().location);
 		double currentGuessFactor = wave.getGuessFactor(currentAbsBFromOrigin);

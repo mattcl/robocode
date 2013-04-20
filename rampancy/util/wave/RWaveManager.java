@@ -83,11 +83,11 @@ public class RWaveManager implements RDrawable {
 	@Override
 	public void draw(Graphics2D g) {
 		for (RBulletWave wave : bulletWaves) {
-			//wave.draw(g);
+			wave.draw(g);
 		}
 		
 		for (REnemyWave wave : enemyWaves) {
-			wave.draw(g);
+			//wave.draw(g);
 		}
 	}
 }

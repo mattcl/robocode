@@ -1,10 +1,12 @@
 package rampancy.util.gun;
 
 import java.awt.Graphics2D;
+import java.awt.geom.Path2D;
 import java.util.ArrayList;
 
 import rampancy.RampantRobot;
 import rampancy.util.REnemyRobot;
+import rampancy.util.RPoint;
 import rampancy.util.RRobotState;
 import rampancy.util.RUtil;
 import rampancy.util.data.kdTree.KDPoint;
@@ -75,12 +77,14 @@ public class RDynamicClusteringGun extends RGun {
 
 		double bestDensity = Double.NEGATIVE_INFINITY;
 		double bestFactor = 0;
-		for (double factor = minGuessFactor; factor <= maxGuessFactor; factor += 0.01) {
+		ArrayList<RPoint> densities = new ArrayList<RPoint>();
+		for (double factor = -1.0; factor <= 1.0; factor += 0.01) {
 			double density = 0;
 			for (KDPoint<DCGunPoint> neighbor : neighbors) {
 				density += neighbor.value.kernel(factor, bandwidth, time);
 			}
 			density = (1.0 / (bandwidth * neighbors.size() * 3)) * density;
+			densities.add(new RPoint(factor, density));
 			if (density > bestDensity) {
 				bestDensity = density;
 				bestFactor = factor;
@@ -101,7 +105,9 @@ public class RDynamicClusteringGun extends RGun {
 			offset = escapeAngleCounterClockwise * bestFactor * state.directionTraveling;
 		}
 		double angle = Utils.normalAbsoluteAngle(enemy.getCurrentState().absoluteBearing + offset);
-		return new Solution(this, enemy, bulletPower, angle);
+		Solution solution = new Solution(this, enemy, bulletPower, angle);
+		solution.setDensities(densities);
+		return solution;
 	}
 	
 	protected double[] getCoordinateForEnemyState(RRobotState state) {
@@ -135,7 +141,8 @@ public class RDynamicClusteringGun extends RGun {
 		}
 		
 		public double kernel(double testPoint, double bandwidth, long currentTime) {
-			double timeFactor = 1.0 / (1 + 0.5 * (currentTime - recordedTime));
+			bandwidth = 0.2;
+			double timeFactor = 1.0 / (1 + 0.005 * (currentTime - recordedTime));
 			if (testPoint >= min && testPoint <= max) {
 				double diff = (testPoint - mid) / bandwidth;
 				return timeFactor * (RUtil.GAUSSIAN_COEFFICIENT * Math.exp(-0.5 * diff * diff) + RUtil.GAUSSIAN_COEFFICIENT);
@@ -152,12 +159,37 @@ public class RDynamicClusteringGun extends RGun {
 	class Solution extends RFiringSolution {
 	    double maxAngleForward;
 	    double maxAngleBackward;
+	    double xScalingFactor;
+	    double yScalingFactor;
+		public ArrayList<RPoint> densities;
+		public Path2D.Double densityGraph;
 
 		public Solution(RGun gun, REnemyRobot target, double power, double firingAngle) {
 			super(gun, target, power, firingAngle);
 		}
 		
+		public void setDensities(ArrayList<RPoint> densities) {
+			this.densities = densities;
+			double maxY = 0.0001;
+			for (RPoint density : densities) {
+				if (density.y > maxY) {
+					maxY = density.y;
+				}
+			}		
+			yScalingFactor = 250.0 / maxY;
+			xScalingFactor = 200.0;
+		
+			densityGraph = new Path2D.Double();
+			densityGraph.moveTo(densities.get(0).x * xScalingFactor + 400, 0);
+			for (RPoint density : densities) {
+				densityGraph.lineTo(density.x * xScalingFactor + 400, density.y * yScalingFactor);
+			}
+		}
+		
 		public void draw(Graphics2D g) {
+			if (densities != null) {
+				g.draw(densityGraph);
+			}
 		}
 	}
 

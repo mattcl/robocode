@@ -63,7 +63,7 @@ public class REnemyWave extends RWave {
 		    }
 		    for (RPoint point : dangerMap) {
 		        RPoint location = origin.projectTo(Utils.normalAbsoluteAngle(point.x + initialTargetState.absoluteBearing), distanceTraveled);
-		        float hue = (float)RUtil.scaleToRange(240, 360, min, max, point.y);
+		        float hue = (float)RUtil.scaleToRange(2.0 / 3.0, 1, min, max, point.y);
 		        Color dangerColor = Color.getHSBColor(hue, 1f, 0.6f);
 		        g.setColor(dangerColor);
 		        RUtil.fillOval(location, 2, g);
