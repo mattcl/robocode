@@ -14,6 +14,7 @@ public class RBulletWave extends RWave {
 	protected RFiringSolution firingSolution;
 	protected RPoint bulletLocation;
 	protected boolean didHit;
+	protected double[] factorDangers;
 
 	public RBulletWave(RRobot creator, RFiringSolution firingSolution, long startTime, Color color) {
 		this(creator, firingSolution, startTime, color, false);
@@ -24,6 +25,7 @@ public class RBulletWave extends RWave {
 		this.firingSolution = firingSolution;
 		this.bulletLocation = this.origin.getCopy();
 		this.firingSolution.gun.noteShotFired();
+		this.factorDangers = null;
 	}
 	
 	public RFiringSolution getFiringSolution() {
@@ -37,6 +39,10 @@ public class RBulletWave extends RWave {
 			didHit = true;
 			firingSolution.gun.noteShotHit();
 		}
+	}
+	
+	public void updateDanger(double[] dangers) {
+	   this.factorDangers = dangers;
 	}
 	
 	public boolean didHitEnemy() {

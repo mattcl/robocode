@@ -144,6 +144,7 @@ public abstract class RampantRobot extends AdvancedRobot implements RRobot {
        Bullet bullet = e.getBullet();
        REnemyWave wave = waveManager.getWaveForBullet(bullet);
        if (wave != null) {
+           wave.setHitLocation(new RPoint(bullet.getX(), bullet.getY()));
            movementManager.update(this, wave);
        }
     }

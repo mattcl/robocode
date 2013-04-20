@@ -9,6 +9,7 @@ import rampancy.util.RUtil;
 import rampancy.util.data.kdTree.KDPoint;
 import rampancy.util.data.kdTree.KDTree;
 import rampancy.util.wave.REnemyWave;
+import robocode.util.Utils;
 
 public class RDCSurfingManager implements RMovementManager {
 	public static final int BUCKET_SIZE = 10;
@@ -34,7 +35,7 @@ public class RDCSurfingManager implements RMovementManager {
                 RUtil.normalize(state.distance),
                 RUtil.normalize(state.timeSinceDirectionChange),
                 RUtil.normalize(state.timeSinceVelocityChange),
-                RUtil.normalize(state.distanceFromWall)
+                RUtil.normalize(state.distanceFromWallCategory)
             };
         return query;
     }
@@ -51,6 +52,8 @@ public class RDCSurfingManager implements RMovementManager {
 
 	@Override
 	public RMovementChoice getMovementChoice(RampantRobot reference, REnemyWave wave) {
+	    double escapeAngleClockwise = wave.getEscapeAngleClockwise();
+	    double escapeAngleCounterClockwise = wave.getEscapeAngleCounterClockwise();
 		// 1. Determine the wave that poses the greatest danger to us right now
 		// 2. Compute our current max escape angle in each direction for that wave
 		// 3. Determine the safest guess factors (make sure to take into account the bot width
@@ -74,35 +77,14 @@ public class RDCSurfingManager implements RMovementManager {
 		if (neighbors.isEmpty()) {
 		    return null; // TODO: other movement
 		}
-		double desiredGuessFactor = getBestFactor(neighbors, time);
-		// determine the absB for this guess factor
-	
-		double currentAbsBFromOrigin = wave.getOrigin().computeAbsoluteBearingTo(reference.getCurrentState().location);
-		double currentGuessFactor = wave.getGuessFactor(currentAbsBFromOrigin);
-		int directionAtFireTime = wave.getInitialTargetState().directionTraveling;
-		/*
-		 * if desiregGuessFactor - currentGuessFactor > 0, we need to move towards that guess factor
-		 *    if initial direction is 1, then we need to move clockwise
-		 */
-		if (Math.abs(currentGuessFactor - desiredGuessFactor) < 0.05) {
-		    // we want to stop
-		} else if(currentGuessFactor > desiredGuessFactor) {
-		    // we want to orbit 
-		} else {
-		    
-		}
 		
-	    double orbitAngleClockwise = RUtil.computeOrbitAngle(RampantRobot.getGlobalBattlefield(), wave.getOrigin(), reference.getCurrentState().location, 0, 1);
-	    double orbitAngleCounterClockwise = RUtil.computeOrbitAngle(RampantRobot.getGlobalBattlefield(), wave.getOrigin(), reference.getCurrentState().location, 0, -1);
-	    
-		return new RMovementChoice(orbitAngleClockwise, 200);
-	}
-
-    private double getBestFactor(ArrayList<KDPoint<DCSurfingPoint>> neighbors, long time) {
+		reference.out.println(neighbors.size());
+		// determine the absB for this guess factor
         double mu = 0;
 		for (KDPoint<DCSurfingPoint> neighbor : neighbors) {
 			mu += neighbor.value.guessFactor;
 		}
+		reference.out.println(mu);
 	
 		double sigma = 0;
 		for (KDPoint<DCSurfingPoint> neighbor : neighbors) {
@@ -110,22 +92,53 @@ public class RDCSurfingManager implements RMovementManager {
 		}
 		sigma = Math.sqrt(1.0 / neighbors.size() * sigma);
 		double bandwidth = (1.06 * sigma) * Math.pow(neighbors.size(), -1.0/5.0);
-
 		double bestDensity = Double.POSITIVE_INFINITY;
-		double bestFactor = 0;
+		double desiredGuessFactor = 0;
+		ArrayList<RPoint> densities = new ArrayList<RPoint>();
 		for (double factor = -1.0; factor <= 1.0; factor += 0.05) {
 			double density = 0;
 			for (KDPoint<DCSurfingPoint> neighbor : neighbors) {
 				density += neighbor.value.kernel(factor, bandwidth, time);
 			}
 			density = (1.0 / (bandwidth * neighbors.size())) * density;
+			int guessFactorDirection = RUtil.nonZeroSign(factor);
+			int realDirection = guessFactorDirection * wave.getInitialTargetState().directionTraveling;
+			double escapeAngle = escapeAngleClockwise;
+			if (realDirection < 0) {
+			   escapeAngle = escapeAngleCounterClockwise; 
+			}
+			double offset = Utils.normalRelativeAngle(factor * escapeAngle);
+			densities.add(new RPoint(offset, density));
 			if (density < bestDensity) {
 				bestDensity = density;
-				bestFactor = factor;
+				desiredGuessFactor = factor;
 			}
 		}
-		return bestFactor;
-    }
+		
+		wave.setDangerMap(densities);
+		reference.out.println(densities.toString());
+	
+		double currentAbsBFromOrigin = wave.getOrigin().computeAbsoluteBearingTo(reference.getCurrentState().location);
+		double currentGuessFactor = wave.getGuessFactor(currentAbsBFromOrigin);
+		
+		/*
+		 * if desiregGuessFactor - currentGuessFactor > 0, we need to move towards that guess factor
+		 *    if initial direction is 1, then we need to move clockwise
+		 */
+	    double orbitAngleClockwise = RUtil.computeOrbitAngle(RampantRobot.getGlobalBattlefield(), wave.getOrigin(), reference.getCurrentState().location, 0, 1);
+	    double orbitAngleCounterClockwise = RUtil.computeOrbitAngle(RampantRobot.getGlobalBattlefield(), wave.getOrigin(), reference.getCurrentState().location, 0, -1);
+	   
+	    double guessFactorDiff = currentGuessFactor - desiredGuessFactor;
+	    int guessFactorDirection = RUtil.nonZeroSign(guessFactorDiff);
+	    
+		if (Math.abs(guessFactorDiff) < 0.05) {
+    		return new RMovementChoice(orbitAngleClockwise, 0);
+		} else if(guessFactorDirection * wave.getInitialTargetState().directionTraveling > 0) {
+    		return new RMovementChoice(orbitAngleClockwise, 200);
+		} else {
+    		return new RMovementChoice(orbitAngleCounterClockwise, 200);
+		}
+	}
 	
 	protected RPoint getOrbitLocation() {
 		return null;

@@ -62,6 +62,14 @@ abstract public class RWave implements RDrawable {
 		this.color = color;
 	}
 	
+	public double getEscapeAngleClockwise() {
+	    return escapeAngleClockwise;
+	}
+	
+	public double getEscapeAngleCounterClockwise() {
+	    return escapeAngleCounterClockwise;
+	}
+	
 	public boolean didBreak() {
 		// TODO: make this more accurate
 		return (distanceTraveled > target.getCurrentState().location.distance(origin) + 50);
