@@ -15,7 +15,6 @@ import rampancy.util.RUtil;
 import rampancy.util.gun.RDisabledGun;
 import rampancy.util.gun.RFiringSolution;
 import rampancy.util.gun.RGunManager;
-import rampancy.util.movement.RDCSurfingManager;
 import rampancy.util.movement.RMovementChoice;
 import rampancy.util.movement.RMovementManager;
 import rampancy.util.wave.RBulletWave;
@@ -61,6 +60,7 @@ public abstract class RampantRobot extends AdvancedRobot implements RRobot {
     }
     
     abstract protected void initGunManager(RGunManager gunManager);
+    abstract protected void initMovementManager();
 
     public void run() {
         super.run();
@@ -76,7 +76,7 @@ public abstract class RampantRobot extends AdvancedRobot implements RRobot {
         }
         
         if (movementManager == null) {
-        	movementManager = new RDCSurfingManager();
+        	initMovementManager();
         }
 
         if (gunManager == null) {
@@ -111,15 +111,13 @@ public abstract class RampantRobot extends AdvancedRobot implements RRobot {
         waveManager.update(this);
         
         // determine movement here
-       
-        /*
         REnemyWave surfableWave = waveManager.getMostDangerousWave(this);
         if (surfableWave != null) {
 	        RMovementChoice movementChoice = movementManager.getMovementChoice(this, surfableWave);
 	        if (movementChoice != null) {
 	            RUtil.setBackAsFront(this, movementChoice.goAngle, movementChoice.distance);
 	        }
-        }*/
+        }
 
         List<RFiringSolution> firingSolutions = gunManager.getFiringSolutions(this, enemy);
         if (!firingSolutions.isEmpty()) {

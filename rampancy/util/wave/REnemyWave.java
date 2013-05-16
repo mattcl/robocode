@@ -39,6 +39,10 @@ public class REnemyWave extends RWave {
 	    hitGuessFactor = getGuessFactor(absB);
 	}
 	
+	public REnemyRobot getEnemy() {
+	    return enemy;
+	}
+	
 	public RPoint getHitLocation() {
 	   return hitLocation; 
 	}
