@@ -1,5 +1,6 @@
 package rampancy.util.gun;
 
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.geom.Path2D;
 import java.util.ArrayList;
@@ -11,7 +12,9 @@ import rampancy.util.RRobotState;
 import rampancy.util.RUtil;
 import rampancy.util.data.kdTree.KDPoint;
 import rampancy.util.data.kdTree.KDTree;
+import rampancy.util.movement.RMovementPath;
 import rampancy.util.wave.RBulletWave;
+import robocode.Rules;
 import robocode.util.Utils;
 
 // This is only suited for 1v1 battles!
@@ -97,26 +100,27 @@ public class RDynamicClusteringGun extends RGun {
 			bulletPower = 1.2;
 		}
 		double bulletVelocity = RUtil.computeBulletVelocity(bulletPower);
-		double escapeAngleClockwise = RUtil.computePreciseMaxEscapeAngle(RampantRobot.getGlobalBattlefield(), reference.getCurrentState(), state, bulletVelocity, 1 * state.directionTraveling);
-		double escapeAngleCounterClockwise = RUtil.computePreciseMaxEscapeAngle(RampantRobot.getGlobalBattlefield(), reference.getCurrentState(), state, bulletVelocity, -1 * state.directionTraveling);
+		RMovementPath positivePath = new RMovementPath(Color.RED);
+		RMovementPath negativePath = new RMovementPath(Color.YELLOW);
+		double escapeAnglePositive = RUtil.computePreciseMaxEscapeAngle(RampantRobot.getGlobalBattlefield(), reference.getCurrentState(), state, bulletVelocity, 1 * state.directionTraveling, positivePath);
+		double escapeAngleNegative = RUtil.computePreciseMaxEscapeAngle(RampantRobot.getGlobalBattlefield(), reference.getCurrentState(), state, bulletVelocity, -1 * state.directionTraveling, negativePath);
+	
+		double escapeAngle = bestFactor >= 0 ? escapeAnglePositive : escapeAngleNegative;
+		double offset = bestFactor * escapeAngle * state.directionTraveling;
 		
-		double offset = escapeAngleClockwise * bestFactor * state.directionTraveling;
-		if (bestFactor < 0) {
-			offset = escapeAngleCounterClockwise * bestFactor * state.directionTraveling;
-		}
 		double angle = Utils.normalAbsoluteAngle(enemy.getCurrentState().absoluteBearing + offset);
-		Solution solution = new Solution(this, enemy, bulletPower, angle);
+		Solution solution = new Solution(this, enemy, bulletPower, angle, positivePath, negativePath);
 		solution.setDensities(densities);
 		return solution;
 	}
 	
 	protected double[] getCoordinateForEnemyState(RRobotState state) {
 		double[] query = {
-				RUtil.normalize(state.lateralVelocity),
-				RUtil.normalize(state.advancingVelocity),
-				RUtil.normalize(state.distance),
-				RUtil.normalize(state.timeSinceDirectionChange),
-				RUtil.normalize(state.timeSinceVelocityChange),
+				RUtil.normalize(state.lateralVelocity, -Rules.MAX_VELOCITY, Rules.MAX_VELOCITY),
+				RUtil.normalize(state.advancingVelocity, -Rules.MAX_VELOCITY, Rules.MAX_VELOCITY),
+				RUtil.normalize(state.distance, 0, RampantRobot.getGlobalBattlefield().getMaxDistance()),
+				RUtil.normalizeTime(state.timeSinceDirectionChange),
+				RUtil.normalizeTime(state.timeSinceVelocityChange),
 			};
 		return query;
 	}
@@ -163,9 +167,17 @@ public class RDynamicClusteringGun extends RGun {
 	    double yScalingFactor;
 		public ArrayList<RPoint> densities;
 		public Path2D.Double densityGraph;
+		public RMovementPath positivePath;
+		public RMovementPath negativePath;
 
 		public Solution(RGun gun, REnemyRobot target, double power, double firingAngle) {
+			this(gun, target, power, firingAngle, null, null);
+		}
+		
+		public Solution(RGun gun, REnemyRobot target, double power, double firingAngle, RMovementPath positivePath, RMovementPath negativePath) {
 			super(gun, target, power, firingAngle);
+			this.positivePath = positivePath;
+			this.negativePath = negativePath;
 		}
 		
 		public void setDensities(ArrayList<RPoint> densities) {
@@ -187,9 +199,13 @@ public class RDynamicClusteringGun extends RGun {
 		}
 		
 		public void draw(Graphics2D g) {
-			if (densities != null) {
-				g.draw(densityGraph);
+			if (positivePath != null) {
+				positivePath.draw(g);
 			}
+			
+			if (negativePath != null) {
+				negativePath.draw(g);
+			}		
 		}
 	}
 

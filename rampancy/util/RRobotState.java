@@ -75,7 +75,7 @@ public class RRobotState {
             this.advancingVelocity        = velocity * -1 * Math.cos(heading - absoluteBearing);
             this.deltaV                   = lastState == null ? 0 : velocity - lastState.velocity;
             this.accelerating             = deltaV > 0;
-            this.braking                 = !accelerating;
+            this.braking                  = !accelerating;
             this.deltaH                   = lastState == null ? 0 : heading - lastState.heading;
             this.distance                 = e.getDistance();
             this.distanceFromWall         = RUtil.getDistanceFromWall(battlefield, location);

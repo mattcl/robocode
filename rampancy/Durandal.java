@@ -5,6 +5,7 @@ import java.awt.Color;
 import rampancy.util.gun.RCircularTargetingGun;
 import rampancy.util.gun.RDynamicClusteringGun;
 import rampancy.util.gun.RGunManager;
+import rampancy.util.movement.RDCSurfingManager;
 import rampancy.util.movement.ROrbitManager;
 
 public class Durandal extends RampantRobot {
@@ -30,6 +31,7 @@ public class Durandal extends RampantRobot {
 
     @Override
     protected void initMovementManager() {
-        movementManager = new ROrbitManager();
+        //movementManager = new ROrbitManager();
+        movementManager = new RDCSurfingManager();
     }
 }

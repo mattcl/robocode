@@ -1,6 +1,7 @@
 package rampancy;
 
 import java.awt.Graphics2D;
+import java.awt.event.KeyEvent;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -85,7 +86,11 @@ public abstract class RampantRobot extends AdvancedRobot implements RRobot {
         	initGunManager(gunManager);
         }
         
-        waveManager = new RWaveManager();
+        if (waveManager == null) {
+	        waveManager = new RWaveManager();
+        }
+        
+        waveManager.reset();
         
         setTurnRadarRightRadians(Double.POSITIVE_INFINITY);
         location = new RPoint(getX(), getY());
@@ -175,6 +180,18 @@ public abstract class RampantRobot extends AdvancedRobot implements RRobot {
 
         waveManager.draw(g);
     }
+    
+	public void onKeyTyped(KeyEvent e) {
+    	char c = e.getKeyChar();
+    	switch(c) {
+    	case 'b':
+    		waveManager.toggleBulletWaves();
+    		break;
+    	case 'w':
+    		waveManager.toggleEnemyWaves();
+    		break;
+    	}
+    }
 
     public RRobotState getCurrentState() {
         if (stateHistory.isEmpty()) {
@@ -213,7 +230,7 @@ public abstract class RampantRobot extends AdvancedRobot implements RRobot {
 	                waveManager.add(wave);
             	}
             }
-            return true;
+        	return true;
         }
         return false;
     }

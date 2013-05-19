@@ -15,13 +15,14 @@ public class RBattlefield {
     public static final double AGAINST_WALL_TOLERANCE = 150;
     public static final double NEAR_WALL_TOLERANCE    = AGAINST_WALL_TOLERANCE + 150;
     
-    public static final int INNER_DISTANCE = 19;
+    public static final int INNER_DISTANCE = 18;
     
     public Rectangle bfRect;
     public Rectangle innerRect;
     public Rectangle adjustedInnerRect;
     public int width;
     public int height;
+    public double maxDistance;
     
     public RBattlefield(int width, int height) {
         this.width = width;
@@ -35,6 +36,11 @@ public class RBattlefield {
                 INNER_DISTANCE - 9, 
                 width - INNER_DISTANCE * 2 + 18, 
                 height - INNER_DISTANCE * 2 + 18);
+        maxDistance = Math.sqrt(width * width + height * height);
+    }
+    
+    public double getMaxDistance() {
+    	return maxDistance;
     }
     
     public boolean contains(RPoint point) {

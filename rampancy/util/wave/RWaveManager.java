@@ -11,8 +11,16 @@ import robocode.Bullet;
 public class RWaveManager implements RDrawable {
 	protected ArrayList<REnemyWave> enemyWaves;
 	protected ArrayList<RBulletWave> bulletWaves;
+	protected boolean drawBulletWaves;
+	protected boolean drawEnemyWaves;
 
 	public RWaveManager() {
+		reset();
+		drawBulletWaves = false;
+		drawEnemyWaves = false;
+	}
+	
+	public void reset() {
 		this.enemyWaves = new ArrayList<REnemyWave>();
 		this.bulletWaves = new ArrayList<RBulletWave>();
 	}
@@ -79,15 +87,27 @@ public class RWaveManager implements RDrawable {
 	    }
 	    return bestWave;
 	}
+	
+	public void toggleBulletWaves() {
+		drawBulletWaves = !drawBulletWaves;
+	}
+	
+	public void toggleEnemyWaves() {
+		drawEnemyWaves = !drawEnemyWaves;
+	}
 
 	@Override
 	public void draw(Graphics2D g) {
-		for (RBulletWave wave : bulletWaves) {
-			wave.draw(g);
+		if (drawBulletWaves) {
+			for (RBulletWave wave : bulletWaves) {
+				wave.draw(g);
+			}
 		}
-		
-		for (REnemyWave wave : enemyWaves) {
-			//wave.draw(g);
+	
+		if (drawEnemyWaves) {
+			for (REnemyWave wave : enemyWaves) {
+				wave.draw(g);
+			}
 		}
 	}
 }

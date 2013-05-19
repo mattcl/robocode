@@ -29,8 +29,8 @@ abstract public class RWave implements RDrawable {
 	protected RRobot target;
 	protected RRobotState initialCreatorState;
 	protected RRobotState initialTargetState;
-	protected double escapeAngleClockwise;
-	protected double escapeAngleCounterClockwise;
+	protected double escapeAnglePositive;
+	protected double escapeAngleNegative;
 	protected RMovementPath path1;
 	protected RMovementPath path2;
 	protected double smallestAbsB;
@@ -55,19 +55,19 @@ abstract public class RWave implements RDrawable {
 		this.isVirtual = isVirtual;
 		this.path1 = new RMovementPath();
 		this.path2 = new RMovementPath();
-		this.escapeAngleClockwise = RUtil.computePreciseMaxEscapeAngle(RampantRobot.getGlobalBattlefield(), initialCreatorState, initialTargetState, velocity, 1 * initialTargetState.directionTraveling, path1);
-		this.escapeAngleCounterClockwise = RUtil.computePreciseMaxEscapeAngle(RampantRobot.getGlobalBattlefield(), initialCreatorState, initialTargetState, velocity, -1 * initialTargetState.directionTraveling, path2);
+		this.escapeAnglePositive = RUtil.computePreciseMaxEscapeAngle(RampantRobot.getGlobalBattlefield(), initialCreatorState, initialTargetState, velocity, 1 * initialTargetState.directionTraveling, path1);
+		this.escapeAngleNegative = RUtil.computePreciseMaxEscapeAngle(RampantRobot.getGlobalBattlefield(), initialCreatorState, initialTargetState, velocity, -1 * initialTargetState.directionTraveling, path2);
 		this.largestAbsB = Double.NEGATIVE_INFINITY;
 		this.smallestAbsB = Double.POSITIVE_INFINITY;
 		this.color = color;
 	}
 	
-	public double getEscapeAngleClockwise() {
-	    return escapeAngleClockwise;
+	public double getEscapeAnglePositive() {
+	    return escapeAnglePositive;
 	}
 	
-	public double getEscapeAngleCounterClockwise() {
-	    return escapeAngleCounterClockwise;
+	public double getEscapeAngleNegative() {
+	    return escapeAngleNegative;
 	}
 	
 	public boolean didBreak() {
@@ -98,11 +98,12 @@ abstract public class RWave implements RDrawable {
 				RPoint midpoint = origin.projectTo(largestAbsB, distanceTraveled / 2);
 				g.drawString("" + RUtil.roundToPrecision(getGuessFactorForLargest(), 2), (int) midpoint.x, (int) midpoint.y);
 			}
+			RUtil.drawLine(origin, origin.projectTo(initialTargetState.absoluteBearing, distanceTraveled), g);
 			int direction = initialTargetState.directionTraveling;
 			g.setColor(Color.red);
-			RUtil.drawLine(origin, origin.projectTo(escapeAngleClockwise * direction + initialTargetState.absoluteBearing, distanceTraveled), g);
+			RUtil.drawLine(origin, origin.projectTo(escapeAnglePositive * direction + initialTargetState.absoluteBearing, distanceTraveled), g);
 			g.setColor(Color.yellow);
-			RUtil.drawLine(origin, origin.projectTo(-escapeAngleCounterClockwise *direction + initialTargetState.absoluteBearing, distanceTraveled), g);
+			RUtil.drawLine(origin, origin.projectTo(-escapeAngleNegative *direction + initialTargetState.absoluteBearing, distanceTraveled), g);
 		}
 	}
 	
@@ -141,14 +142,13 @@ abstract public class RWave implements RDrawable {
 	
 	public double getGuessFactor(double desiredAbsB) {
 		double angleOffset = Utils.normalRelativeAngle(desiredAbsB - initialTargetState.absoluteBearing);
-		double escapeAngle = escapeAngleClockwise;
-		if (initialTargetState.directionTraveling < 0) {
-			escapeAngle = escapeAngleCounterClockwise;
+		double theta = angleOffset * initialTargetState.directionTraveling;
+		double maxEscapeAngle = RUtil.nonZeroSign(theta) > 0 ? escapeAnglePositive : escapeAngleNegative;
+		if (maxEscapeAngle > 0) {
+			double guessFactor = theta / maxEscapeAngle;
+			return Math.max(-1.0, Math.min(1.0, guessFactor));
 		}
-		if (angleOffset > escapeAngle) {
-			escapeAngle = RUtil.computeMaxEscapeAngle(velocity);
-		}
-		return Math.max(-1, Math.min(1, angleOffset / Math.abs(escapeAngle))) * initialTargetState.directionTraveling;
+		return 0;
 	}
 	
 	public double getGuessFactorForLargest() {

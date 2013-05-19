@@ -9,6 +9,7 @@ import rampancy.util.RUtil;
 import rampancy.util.data.kdTree.KDPoint;
 import rampancy.util.data.kdTree.KDTree;
 import rampancy.util.wave.REnemyWave;
+import robocode.Rules;
 import robocode.util.Utils;
 
 public class RDCSurfingManager implements RMovementManager {
@@ -30,12 +31,11 @@ public class RDCSurfingManager implements RMovementManager {
 	
 	protected double[] getCoordinateForState(RRobotState state) {
         double[] query = {
-                RUtil.normalize(state.lateralVelocity),
-                RUtil.normalize(state.advancingVelocity),
-                RUtil.normalize(state.distance),
-                RUtil.normalize(state.timeSinceDirectionChange),
-                RUtil.normalize(state.timeSinceVelocityChange),
-                RUtil.normalize(state.distanceFromWallCategory)
+				RUtil.normalize(state.lateralVelocity, -Rules.MAX_VELOCITY, Rules.MAX_VELOCITY),
+				RUtil.normalize(state.advancingVelocity, -Rules.MAX_VELOCITY, Rules.MAX_VELOCITY),
+				RUtil.normalize(state.distance, 0, RampantRobot.getGlobalBattlefield().getMaxDistance()),
+                RUtil.normalizeTime(state.timeSinceDirectionChange),
+                RUtil.normalizeTime(state.timeSinceVelocityChange)
             };
         return query;
     }
@@ -52,8 +52,8 @@ public class RDCSurfingManager implements RMovementManager {
 
 	@Override
 	public RMovementChoice getMovementChoice(RampantRobot reference, REnemyWave wave) {
-	    double escapeAngleClockwise = wave.getEscapeAngleClockwise();
-	    double escapeAngleCounterClockwise = wave.getEscapeAngleCounterClockwise();
+	    double escapeAnglePositive = wave.getEscapeAnglePositive();
+	    double escapeAngleNegative = wave.getEscapeAngleNegative();
 		// 1. Determine the wave that poses the greatest danger to us right now
 		// 2. Compute our current max escape angle in each direction for that wave
 		// 3. Determine the safest guess factors (make sure to take into account the bot width
@@ -90,7 +90,9 @@ public class RDCSurfingManager implements RMovementManager {
 		}
 		sigma = Math.sqrt(sigma / neighbors.size());
 		double bandwidth = (1.06 * sigma) * Math.pow(neighbors.size(), -1.0/5.0);
-		reference.out.println(bandwidth);
+		if (bandwidth == 0) {
+			bandwidth = 0.5;
+		}
 		double bestDensity = Double.POSITIVE_INFINITY;
 		double desiredGuessFactor = 0;
 		ArrayList<RPoint> densities = new ArrayList<RPoint>();
@@ -102,9 +104,9 @@ public class RDCSurfingManager implements RMovementManager {
 			density = (1.0 / (bandwidth * neighbors.size())) * density;
 			int guessFactorDirection = RUtil.nonZeroSign(factor);
 			int realDirection = guessFactorDirection * wave.getInitialTargetState().directionTraveling;
-			double escapeAngle = escapeAngleClockwise;
+			double escapeAngle = escapeAnglePositive;
 			if (realDirection < 0) {
-			   escapeAngle = escapeAngleCounterClockwise; 
+			   escapeAngle = escapeAngleNegative; 
 			}
 			double offset = Utils.normalRelativeAngle(factor * escapeAngle);
 			densities.add(new RPoint(offset, density));

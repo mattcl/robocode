@@ -7,6 +7,7 @@ import java.awt.Graphics2D;
 import java.util.ArrayList;
 
 import rampancy.util.external.MovementPredictor;
+import rampancy.util.external.WallSmoothing;
 import rampancy.util.movement.RMovementPath;
 import robocode.AdvancedRobot;
 import robocode.util.Utils;
@@ -98,8 +99,9 @@ public abstract class RUtil {
     }*/
     
     public static double computeOrbitAngle(RBattlefield battlefield, RPoint center, RPoint location, double attackAngle, int direction) {
-        double goAngle = RUtil.computeAbsoluteBearing(center, location);
-        return RUtil.wallSmoothing(battlefield, location, goAngle + (Math.PI / 2.0 + attackAngle) * direction, direction, location.distance(center));
+    	return WallSmoothing.wallSmoothedAngle(battlefield, center, location, direction, center.distance(location));
+        //double goAngle = RUtil.computeAbsoluteBearing(center, location);
+        //return RUtil.wallSmoothing(battlefield, location, goAngle + (Math.PI / 2.0 + attackAngle) * direction, direction, location.distance(center));
     }
     
     public static void drawLine(RPoint p1, RPoint p2, Graphics2D g) {
@@ -296,40 +298,29 @@ public abstract class RUtil {
      * @return
      */
     public static double scaleToRange(double min, double max, double minExpected, double maxExpected, double value) {
-        return scaleToRange(min, max, minExpected, maxExpected, value, 0);
-    }
-
-    /**
-     * Scales a given value to fall within the given min and max values
-     * @param min
-     * @param max
-     * @param minExpected
-     * @param maxExpected
-     * @param value
-     * @param offset
-     * @return
-     */
-    public static double scaleToRange(double min, double max, double minExpected, double maxExpected, double value, double offset) {
-        double scaleRange = max - min;
-        double valueRange = maxExpected - minExpected;
-        double percentDiff = scaleRange / valueRange;
-        return RUtil.limit(min, (value + offset) * percentDiff, max);
+    	double computed = (value - minExpected) / (maxExpected - minExpected) * (max - min) + min;
+        return RUtil.limit(min, computed, max);
     }
     
-    public static double normalize(double value) {
-    	return normalize(value, 1);
+    public static double normalize(double val, double minExpected, double maxExpected) {
+    	double scalingFactor = 1.0 / Math.abs(maxExpected - minExpected);
+    	if (val > maxExpected) {
+    		val = maxExpected;
+    	}
+    	if (val < minExpected) {
+    		val = minExpected;
+    	}
+    	return val * scalingFactor;
     }
     
-    public static double normalize(double value, double weight) {
+    public static double normalizeTime(double value) {
+    	return normalizeTime(value, 1);
+    }
+    
+    public static double normalizeTime(double value, double weight) {
     	return 1.0 / (1.0 + weight * value);
     }
     
-    /**
-     * Credit: Voidious
-     * @param robot
-     * @param goAngle
-     * @param dist
-     */
     public static void setBackAsFront(AdvancedRobot robot, double goAngle, double dist) {
         double angle = Utils.normalRelativeAngle(goAngle - robot.getHeadingRadians());
         if (Math.abs(angle) > (Math.PI/2)) {
