@@ -1,5 +1,7 @@
 package rampancy.util.movement;
 
+import java.util.List;
+
 import rampancy.RampantRobot;
 import rampancy.util.REnemyRobot;
 import rampancy.util.RRobotState;
@@ -35,7 +37,7 @@ public class ROrbitManager implements RMovementManager {
     }
 
     @Override
-    public RMovementChoice getMovementChoice(RampantRobot reference, REnemyWave wave) {
+    public RMovementChoice getMovementChoice(RampantRobot reference, List<REnemyWave> waves) {
         if (timeStartCurrentDirection < 0) {
             timeStartCurrentDirection = reference.getTime();
         }
@@ -46,7 +48,7 @@ public class ROrbitManager implements RMovementManager {
             timeStartCurrentDirection = reference.getTime();
         }
         
-        REnemyRobot enemy = wave.getEnemy();
+        REnemyRobot enemy = waves.get(0).getEnemy();
         RRobotState enemyState = enemy.getCurrentState();
         double attackAngle = 0;
         if (enemy.getPreferredSafeDistance() > enemyState.distance) {

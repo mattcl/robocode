@@ -1,6 +1,7 @@
 package rampancy.util.movement;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import rampancy.RampantRobot;
 import rampancy.util.RPoint;
@@ -51,31 +52,16 @@ public class RDCSurfingManager implements RMovementManager {
 	}
 
 	@Override
-	public RMovementChoice getMovementChoice(RampantRobot reference, REnemyWave wave) {
+	public RMovementChoice getMovementChoice(RampantRobot reference, List<REnemyWave> waves) {
+		REnemyWave wave = waves.get(0);
 	    double escapeAnglePositive = wave.getEscapeAnglePositive();
 	    double escapeAngleNegative = wave.getEscapeAngleNegative();
-		// 1. Determine the wave that poses the greatest danger to us right now
-		// 2. Compute our current max escape angle in each direction for that wave
-		// 3. Determine the safest guess factors (make sure to take into account the bot width
-		// 4. Select the best guess factor to move to, given the current situation
-		//		a. we may need to flatten our current movement profile,
-		//         perhaps we select a more dangerous location with the intent
-		//         of distributing our movement profile
-	    // 5. If possible, select our orbit angle path to maintain our desired
-	    //    distance. Possibly move in for the attack if the opponent has a
-	    //    low enough hit percentage
-		// 6. return the movement choice
-		
-		/*
-		 * How to prevent us from moving back and forth? Maybe don't surf more
-		 * than one wave at a time? Don't move into the danger zone of another
-		 * wave? 
-		 */
+	    
 		long time = reference.getTime();
 		KDPoint<DCSurfingPoint> query = new KDPoint<DCSurfingPoint>(null, getCoordinateForState(wave.getInitialTargetState()));
 		ArrayList<KDPoint<DCSurfingPoint>> neighbors = tree.kNearestNeighbors(query, NUM_NEIGHBORS);
 		if (neighbors.isEmpty()) {
-		    return null; // TODO: other movement
+		    return null;
 		}
 		
 		// determine the absB for this guess factor
@@ -127,7 +113,23 @@ public class RDCSurfingManager implements RMovementManager {
 		 */
 	    double orbitAngleClockwise = RUtil.computeOrbitAngle(RampantRobot.getGlobalBattlefield(), wave.getOrigin(), reference.getCurrentState().location, 0, 1);
 	    double orbitAngleCounterClockwise = RUtil.computeOrbitAngle(RampantRobot.getGlobalBattlefield(), wave.getOrigin(), reference.getCurrentState().location, 0, -1);
-	   
+	    
+	    if (desiredGuessFactor > 0 && wave.getInitialTargetState().directionTraveling > 0) {
+	    	return new RMovementChoice(orbitAngleClockwise, 100);
+	    }
+	    
+	    if (desiredGuessFactor > 0 && wave.getInitialTargetState().directionTraveling < 0) {
+	    	return new RMovementChoice(orbitAngleCounterClockwise, 100);
+	    }
+	    
+	    if (desiredGuessFactor < 0 && wave.getInitialTargetState().directionTraveling < 0) {
+	    	return new RMovementChoice(orbitAngleClockwise, 100);
+	    }
+	    
+	    if (desiredGuessFactor < 0 && wave.getInitialTargetState().directionTraveling > 0) {
+	    	return new RMovementChoice(orbitAngleCounterClockwise, 100);
+	    }
+	    
 	    double guessFactorDiff = currentGuessFactor - desiredGuessFactor;
 	    int guessFactorDirection = RUtil.nonZeroSign(guessFactorDiff);
 	    

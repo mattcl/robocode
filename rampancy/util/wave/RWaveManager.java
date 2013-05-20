@@ -2,10 +2,14 @@ package rampancy.util.wave;
 
 import java.awt.Graphics2D;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 import rampancy.RampantRobot;
 import rampancy.util.RDrawable;
 import rampancy.util.RPoint;
+import rampancy.util.RUtil;
 import robocode.Bullet;
 
 public class RWaveManager implements RDrawable {
@@ -70,6 +74,26 @@ public class RWaveManager implements RDrawable {
 			}
 		}
 		return bestWave;
+	}
+	
+	public List<REnemyWave> getMostDangerousWaves(RampantRobot reference) {
+		final RPoint location = reference.getCurrentState().location;
+		ArrayList<REnemyWave> workingWaves = new ArrayList<REnemyWave>(enemyWaves);
+		Collections.sort(workingWaves, new Comparator<REnemyWave>() {
+			public int compare(REnemyWave wave1, REnemyWave wave2) {
+				return RUtil.sign(wave1.timeToImpact(location) - wave2.timeToImpact(location));
+			}
+		});
+		
+		if (workingWaves.isEmpty()) {
+			return null;
+		}
+		
+		if (workingWaves.size() < 2) {
+			return workingWaves.subList(0, 1);
+		}
+		
+		return workingWaves.subList(0, 2);
 	}
 	
 	public REnemyWave getWaveForBullet(Bullet bullet) {
