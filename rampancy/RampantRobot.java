@@ -128,7 +128,7 @@ public abstract class RampantRobot extends AdvancedRobot implements RRobot {
         if (!firingSolutions.isEmpty()) {
             lockFiringSolutions(enemy, firingSolutions);
         } else if (!processingShot) {
-            setTurnGunRightRadians(enemy.getCurrentState().absoluteBearing - getGunHeadingRadians());
+            setTurnGunRightRadians(Utils.normalRelativeAngle(enemy.getCurrentState().absoluteBearing - getGunHeadingRadians()));
         }
 
         if (attemptShot()) {
