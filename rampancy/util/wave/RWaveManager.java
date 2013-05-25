@@ -21,7 +21,7 @@ public class RWaveManager implements RDrawable {
 	public RWaveManager() {
 		reset();
 		drawBulletWaves = false;
-		drawEnemyWaves = false;
+		drawEnemyWaves = true;
 	}
 	
 	public void reset() {

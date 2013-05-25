@@ -17,9 +17,11 @@ public class RDCSurfingManager implements RMovementManager {
 	public static final int BUCKET_SIZE = 10;
 	public static final int NUM_NEIGHBORS = 13;
 	protected KDTree<DCSurfingPoint> tree;
+	protected ROrbitManager orbitManager; // fallback on this
 	
 	public RDCSurfingManager() {
 		tree = new KDTree<DCSurfingPoint>(BUCKET_SIZE);
+		orbitManager = new ROrbitManager();
 	}
 
 	@Override
@@ -58,7 +60,8 @@ public class RDCSurfingManager implements RMovementManager {
 	        if (!wave.hasDangerMap()) {
 	            ArrayList<RPoint> dangerMap = getDangerMapForWave(reference, wave);
 	            if (dangerMap == null) {
-	                return null;
+	            	// No dangers yet, so just orbit
+	                return orbitManager.getMovementChoice(reference, waves);
 	            }
         		wave.setDangerMap(dangerMap);
 	        }
@@ -70,9 +73,20 @@ public class RDCSurfingManager implements RMovementManager {
                 }
             }
 	    }
+	    
+	    REnemyWave wave = waves.get(0);
 	
 		double currentAbsBFromOrigin = wave.getOrigin().computeAbsoluteBearingTo(reference.getCurrentState().location);
 		double currentGuessFactor = wave.getGuessFactor(currentAbsBFromOrigin);
+		
+		double desiredGuessFactor = 0;
+		double lowestDanger = Double.POSITIVE_INFINITY;
+		for (RPoint danger : wave.getDangerMap()) {
+			if (danger.y < lowestDanger) {
+				lowestDanger = danger.y;
+				desiredGuessFactor = danger.x;
+			}
+		}
 		
 		/*
 		 * if desiregGuessFactor - currentGuessFactor > 0, we need to move towards that guess factor
