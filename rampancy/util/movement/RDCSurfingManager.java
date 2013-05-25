@@ -53,56 +53,23 @@ public class RDCSurfingManager implements RMovementManager {
 
 	@Override
 	public RMovementChoice getMovementChoice(RampantRobot reference, List<REnemyWave> waves) {
-		REnemyWave wave = waves.get(0);
-	    double escapeAnglePositive = wave.getEscapeAnglePositive();
-	    double escapeAngleNegative = wave.getEscapeAngleNegative();
-	    
-		long time = reference.getTime();
-		KDPoint<DCSurfingPoint> query = new KDPoint<DCSurfingPoint>(null, getCoordinateForState(wave.getInitialTargetState()));
-		ArrayList<KDPoint<DCSurfingPoint>> neighbors = tree.kNearestNeighbors(query, NUM_NEIGHBORS);
-		if (neighbors.isEmpty()) {
-		    return null;
-		}
-		
-		// determine the absB for this guess factor
-        double mu = 0;
-		for (KDPoint<DCSurfingPoint> neighbor : neighbors) {
-			mu += neighbor.value.guessFactor;
-		}
-	
-		double sigma = 0;
-		for (KDPoint<DCSurfingPoint> neighbor : neighbors) {
-			sigma += neighbor.value.deviationSum(mu);
-		}
-		sigma = Math.sqrt(sigma / neighbors.size());
-		double bandwidth = (1.06 * sigma) * Math.pow(neighbors.size(), -1.0/5.0);
-		if (bandwidth == 0) {
-			bandwidth = 0.5;
-		}
-		double bestDensity = Double.POSITIVE_INFINITY;
-		double desiredGuessFactor = 0;
-		ArrayList<RPoint> densities = new ArrayList<RPoint>();
-		for (double factor = -1.0; factor <= 1.0; factor += 0.05) {
-			double density = 0;
-			for (KDPoint<DCSurfingPoint> neighbor : neighbors) {
-				density += neighbor.value.kernel(factor, bandwidth, time);
-			}
-			density = (1.0 / (bandwidth * neighbors.size())) * density;
-			int guessFactorDirection = RUtil.nonZeroSign(factor);
-			int realDirection = guessFactorDirection * wave.getInitialTargetState().directionTraveling;
-			double escapeAngle = escapeAnglePositive;
-			if (realDirection < 0) {
-			   escapeAngle = escapeAngleNegative; 
-			}
-			double offset = Utils.normalRelativeAngle(factor * escapeAngle);
-			densities.add(new RPoint(offset, density));
-			if (density < bestDensity) {
-				bestDensity = density;
-				desiredGuessFactor = factor;
-			}
-		}
-		
-		wave.setDangerMap(densities);
+	    ArrayList<RPoint> totalDangerMap = null;
+	    for (REnemyWave wave : waves) {
+	        if (!wave.hasDangerMap()) {
+	            ArrayList<RPoint> dangerMap = getDangerMapForWave(reference, wave);
+	            if (dangerMap == null) {
+	                return null;
+	            }
+        		wave.setDangerMap(dangerMap);
+	        }
+            if (totalDangerMap == null) {
+                totalDangerMap = new ArrayList<RPoint>(wave.getDangerMap());
+            } else {
+                for (int i = 0; i < totalDangerMap.size(); i++) {
+                    totalDangerMap.get(i).y += wave.getDangerMap().get(i).y;
+                }
+            }
+	    }
 	
 		double currentAbsBFromOrigin = wave.getOrigin().computeAbsoluteBearingTo(reference.getCurrentState().location);
 		double currentGuessFactor = wave.getGuessFactor(currentAbsBFromOrigin);
@@ -140,6 +107,52 @@ public class RDCSurfingManager implements RMovementManager {
 		} else {
     		return new RMovementChoice(orbitAngleCounterClockwise, 200);
 		}
+	}
+	
+	protected ArrayList<RPoint> getDangerMapForWave(RampantRobot reference, REnemyWave wave) {
+	    double escapeAnglePositive = wave.getEscapeAnglePositive();
+	    double escapeAngleNegative = wave.getEscapeAngleNegative();
+	    
+		long time = reference.getTime();
+		KDPoint<DCSurfingPoint> query = new KDPoint<DCSurfingPoint>(null, getCoordinateForState(wave.getInitialTargetState()));
+		ArrayList<KDPoint<DCSurfingPoint>> neighbors = tree.kNearestNeighbors(query, NUM_NEIGHBORS);
+		if (neighbors.isEmpty()) {
+		    return null;
+		}
+		
+		// determine the absB for this guess factor
+        double mu = 0;
+		for (KDPoint<DCSurfingPoint> neighbor : neighbors) {
+			mu += neighbor.value.guessFactor;
+		}
+	
+		double sigma = 0;
+		for (KDPoint<DCSurfingPoint> neighbor : neighbors) {
+			sigma += neighbor.value.deviationSum(mu);
+		}
+		sigma = Math.sqrt(sigma / neighbors.size());
+		double bandwidth = (1.06 * sigma) * Math.pow(neighbors.size(), -1.0/5.0);
+		if (bandwidth == 0) {
+			bandwidth = 0.5;
+		}
+		
+		ArrayList<RPoint> densities = new ArrayList<RPoint>();
+		for (double factor = -1.0; factor <= 1.0; factor += 0.05) {
+			double density = 0;
+			for (KDPoint<DCSurfingPoint> neighbor : neighbors) {
+				density += neighbor.value.kernel(factor, bandwidth, time);
+			}
+			density = (1.0 / (bandwidth * neighbors.size())) * density;
+			int guessFactorDirection = RUtil.nonZeroSign(factor);
+			int realDirection = guessFactorDirection * wave.getInitialTargetState().directionTraveling;
+			double escapeAngle = escapeAnglePositive;
+			if (realDirection < 0) {
+			   escapeAngle = escapeAngleNegative; 
+			}
+			double offset = Utils.normalRelativeAngle(factor * escapeAngle);
+			densities.add(new RPoint(offset, density));
+		}
+		return densities;
 	}
 	
 	protected RPoint getOrbitLocation() {

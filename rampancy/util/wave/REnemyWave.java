@@ -79,5 +79,12 @@ public class REnemyWave extends RWave {
 	public void setDangerMap(ArrayList<RPoint> map) {
 	    this.dangerMap = map;
 	}
-
+	
+	public ArrayList<RPoint> getDangerMap() {
+	    return dangerMap;
+	}
+	
+	public boolean hasDangerMap() {
+	    return dangerMap != null;
+	}
 }
