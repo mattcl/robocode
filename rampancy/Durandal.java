@@ -24,6 +24,7 @@ public class Durandal extends RampantRobot {
 
 	@Override
 	protected void initGunManager(RGunManager gunManager) {
+    	//gunManager.add(new RPatternMatchingGun());
     	gunManager.add(new RCircularTargetingGun());
     	gunManager.add(new RDynamicClusteringGun());
 	}

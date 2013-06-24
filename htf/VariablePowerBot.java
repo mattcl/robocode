@@ -5,12 +5,10 @@ package htf;
  */
 import java.awt.Color;
 
-import robocode.HitByBulletEvent;
-import robocode.HitWallEvent;
 import robocode.Robot;
 import robocode.ScannedRobotEvent;
 
-public class BasicBot extends Robot {
+public class VariablePowerBot extends Robot {
 
 	public void run() {
 		setColors();
@@ -18,6 +16,7 @@ public class BasicBot extends Robot {
 		// over again. Here, we are just moving in a "square"
 		while (true) {
 			turnLeft(90);
+			turnGunRight(360);
 			ahead(100);
 		}
 	}
@@ -28,7 +27,7 @@ public class BasicBot extends Robot {
 		 * magenta, orange, pink, red, white, yellow 
 		 */
 		this.setColors(
-				Color.red, // body color
+				Color.blue, // body color
 				Color.cyan, // gun color
 				Color.blue, // radar color
 				Color.green, // bullet color 
@@ -40,27 +39,16 @@ public class BasicBot extends Robot {
 	 * This function is called whenever our radar scans another robot.
 	 */
 	public void onScannedRobot(ScannedRobotEvent e) {
-		fire(1.5);
-	}
-
-	/*
-	 * Whenever you are hit by a bullet, this function is called. Here, we're
-	 * using it to turn 90 degrees and move ahead 200. This will hopefully
-	 * move us out of the way of another shot.
-	 */
-	public void onHitByBullet(HitByBulletEvent e) {
-		turnRight(90);
-		ahead(200);
-	}
-
-	/*
-	 * Whenever your robot runs into a wall, this event is triggered. Here, we
-	 * use it to move backwards 150 and turn 90 degrees. This should hopefully
-	 * prevent us from hitting a wall on our next set of moves.
-	 */
-	public void onHitWall(HitWallEvent e) {
-		ahead(-150); // this moves the robot backwards 150
-		// you could also call back(150);
-		turnRight(90);
+	    stop();
+	    /*
+	     * use more powerful bullets if the enemy is closer
+	     */
+	    if (e.getDistance() < 100) {
+    		fire(3.0);
+	    } else if (e.getDistance() < 300) {
+	        fire(1.5);
+	    } else {
+    		fire(0.5);
+	    }
 	}
 }
